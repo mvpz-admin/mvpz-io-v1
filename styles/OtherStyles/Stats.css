@@ -1,0 +1,55 @@
+/* .stats-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid rgba(#255, #255, #255, 0.10); 
+    border-radius: 10px; 
+    overflow: hidden;
+}
+
+.statsTable th, 
+.stats-table td {
+    border: 1px solid rgba(#255, #255, #255, 0.10); 
+    padding: 8px;
+}
+
+.stats-table th {
+    background-color: rgba(#255, #255, #255, 0.5);
+} */
+
+
+.stats-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: none; /* Remove table border */
+    border-radius: 10px; 
+    overflow: hidden;
+    background-color: #222; /* Optional: Background color */
+}
+
+.stats-table th, 
+.stats-table td {
+    border: 1px solid rgba(255, 255, 255, 0.10); /* Fixed RGBA syntax */
+    padding: 8px;
+}
+
+.stats-table th {
+    background-color: rgba(255, 255, 255, 0.1); /* Adjust opacity */
+}
+
+/* Round top corners */
+.stats-table tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.stats-table tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Round bottom corners */
+.stats-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.stats-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}

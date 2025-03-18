@@ -1,0 +1,23 @@
+{
+    "name": "MVPz",
+    "short_name": "MVPz",
+    "description": "MVPz.io is a sports social network that helps college athletes monetize their fanbases. It is also a decentralized fantasy sports platform. MVPz also offers athleisure, accessories, and apparel. All revenue from the apparel is shared with the athletes.",
+    "start_url": "/?pwa=true",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#111111",
+    "icons": [
+      {
+        "src": "/icons/icon-192x192.jpg",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/icons/icon-512x512.jpeg",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  

@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+Disallow: /error
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+Allow: /genone
+Allow: /aboutus
+Allow: /fanzone

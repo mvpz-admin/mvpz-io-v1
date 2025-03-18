@@ -1,0 +1,11 @@
+/* Scoped to the editor */
+.tiptap p {
+    margin: 1em 0;
+  }
+
+  
+  /* Global styling */
+p {
+    margin: 1em 0;
+  }
+  

@@ -1,0 +1,2084 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Address is an embedded document
+type Address {
+  street String
+  city   String
+  state  String
+  zip    String
+}
+
+model Account {
+  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SessionMint {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  token        String   @unique
+  userId       String   @map("user_id")
+  expires      DateTime @default(now())
+  isDeleted    Boolean  @default(false)
+  user         User     @relation("mintSession", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AccountGender{
+  Male
+  Female
+  Prefer_Not_To_Say
+}
+
+
+model User {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  email                  String         @unique
+  isVerified             Boolean?
+  bio                    String?
+  username               String?
+  name                   String?
+  sex                    AccountGender?
+  profileImage           String?
+  bannerImage            String?
+  verticalImage          String?
+  tpProfileImage         String?
+  emailVerified          DateTime?
+  firstname              String?
+  lastname               String?
+  role                   Role?
+  adminRole              AdminRole?
+  athleteTribes          TribeAthlete[]  
+  tribeMembers           TribeMember[]
+  currentLeague          String?
+  currentSchool          String?
+  previousSchool         String?
+  conference             String?
+  primarySport           String?
+  secondarySport         String?
+  primaryPosition        String?
+  secondaryPosition      String?
+  height                 String?
+  weight                 String?
+  dob                    DateTime?
+  nationality            String?
+  biography              String?
+  images                 String?
+  remainingEligibility   Int?
+  class   String?
+  onboardingNo           Int?
+  homeTown               String?
+  cardanoWalletAvailable Boolean?
+  favoriteCollegeTeam    String?
+  tribeSport             String?
+  tribeTeam              String?
+  tribeValuablePlayer    String?
+  subdomain              String?
+  referralCode           String?
+  referrerId             String? @db.ObjectId
+  signupReferralPercentage Float?
+  productReferralPercentage Float?
+  deactivated            Boolean @default(false)
+  takeOfWeekText         String?
+  myBlogText             String?
+  inspiration            String?
+  highlightVideoUrl      String?
+  accounts               Account[]
+  sessions               Session[]
+  socialLinks            SocialLink[]
+  cards                  NFTMintCard[]
+  collections            Collection[]
+  projects               Project[]
+  nftEntities            NFTEntity[] @relation("entitiesOwner")
+  entities               NFTEntity[] @relation("entitiesAthlete")
+  mintSessions           SessionMint[] @relation("mintSession")
+  subscriptions          UserSubscription[]
+  paymentAttempts        PaymentAttempt[]
+  purchaseCards          NFTPurchaseCard[]
+  wallets                Wallet[]
+  cardsRefreshDate       DateTime?
+  referralType           String?
+  challenges             UserChallenge[]
+  orders                 ApparelOrder[]
+  addresses              UserAddress[]
+  paymentMethods         PaymentMethod[]
+  post                   Post[]
+  tPost                  TribePost[]
+  comment                Comment[]
+  share                  Share[]
+  reply                  Reply[]
+  clap                   Clap[]
+  clover                 Clover[]
+  bolt                   Bolt[]
+  like                   Like[]
+  tcomments              TComment[]
+  treplies               TReply[]
+  tshares                TShare[]
+  tlikes                 TLike[]
+  tclaps                 TClap[]
+  tclovers               TClover[]
+  tbolts                 TBolt[]
+  following              UserFollower[] @relation("UserFollowing")
+  followers              UserFollower[] @relation("UserFollowed")
+  tribeShouts            TribeShout[]       @relation("UserPostedShouts")
+  tribeShoutsComments    TShtComment[]      @relation("UserPostedComments")
+  tribeShoutsReplies     TShtReply[]        @relation("UserPostedReplies")
+  tribeShoutsShares      TShtShare[]        @relation("UserPostedShares")
+  tribeShoutsLikes       TShtLike[]         @relation("UserPostedLikes")
+  tribeShoutsClaps       TShtClap[]         @relation("UserPostedClaps")
+  tribeShoutsClovers     TShtClover[]       @relation("UserPostedClovers")
+  tribeShoutsBolts       TShtBolt[]         @relation("UserPostedBolts")
+  organisationId         String? @db.ObjectId
+  organisation           Organisation? @relation(fields:[organisationId], references:[id])
+  webStripeId            String? @db.ObjectId
+  ebStripe              WebStripe?
+  hiddenPosts            HiddenPost[]
+  hiddenTribePosts       HiddenTribePost[]
+  hiddenShouts           HiddenShout[]
+  blockedUsers           BlockedUser[]   @relation("BlockingUsers")
+  blockedBy              BlockedUser[]   @relation("BlockedByUsers")
+  cardRequests           CardRequest[]         @relation("UserCardRequests")
+  isMascot               Boolean?      @default(false)
+  isMvpzAccount          Boolean?     @default(false)
+  isMvpzTestingAccount   Boolean? @default(false)
+  instagramId            String?
+  instagramVerified      Boolean? @default(false)
+  deactivate         Boolean? @default(false)
+  isDeleted          Boolean? @default(false)
+  isAnonymous        Boolean? @default(false)
+  ppsentTips               PublicPostTips[]  @relation("UserSentTips")
+  ppreceivedTips           PublicPostTips[]  @relation("UserReceivedTips")
+  tpsentTips               TribePostTips[]  @relation("UserSentTips")
+  tpreceivedTips           TribePostTips[]  @relation("UserReceivedTips")
+  tssentTips               TribeShoutsTips[]  @relation("UserSentTips")
+  tsreceivedTips           TribeShoutsTips[]  @relation("UserReceivedTips")
+  athsentTips               AthleteTips[]  @relation("UserSentTips")
+  athreceivedTips           AthleteTips[]  @relation("UserReceivedTips")
+  notifications Notification[]
+  productReport               ProductReport[]  @relation("ProductReport")
+  userStripePayout          StripePayout[]   @relation("UserPayout")
+  fromUserStripePayout          StripePayout[]   @relation("fromUserPayoutRecived")
+  marketplaceCards       MarketplaceCard[] @relation("MarketplaceCardSeller")
+  marketplaceCardLikes   MarketplaceCardLikes[] @relation("MarketplaceCardUserLikes")
+  wishlistedCards        WishlistedMarketPlaceCard[] @relation("MarketplaceCardUserWishlist")  
+  tradeHistory           MarkeCardTradeHistory[] @relation("TradeHistoryBuyer")
+  xp                     Int? @default(0)
+  isProfileCompleted     Boolean @default(false)
+  createdAt              DateTime      @default(now()) @map(name: "created_at")
+  updatedAt              DateTime      @updatedAt @map(name: "updated_at")        
+}
+
+
+model OTP {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique // Email associated with the OTP
+  otpCode   String   // The 4-digit OTP code
+  expiresAt DateTime // Expiration timestamp
+  createdAt DateTime @default(now())  // Automatically set when created
+}
+
+
+enum PayoutTypes{
+  card
+  tip
+  referral
+  apparel
+  xp
+}
+
+model EnableWithdraw{
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  isEnable   Boolean 
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+
+enum ClaimTypes{
+  instant
+  manual
+}
+
+model EarningWithdrawAccess{
+ id         String   @id @default(auto()) @map("_id") @db.ObjectId
+ type       ClaimTypes
+ createdAt DateTime @default(now()) @map(name: "created_at")
+ updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model StripeWithdrawPayoutLimit{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  minWithdraw        Float
+  maxWithdraw        Float
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+}
+
+model MvpzEarnings{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      PayoutTypes
+  earnedAmount    Float
+  stripeCharges   Float
+  stripePayoutId  String      @db.ObjectId 
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model StripeCharges{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionCharge Float
+  paymentSuccessCharge Float
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model StripePayout{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      PayoutTypes
+  amount    Float
+  payoutUserId    String      @db.ObjectId
+  payoutUser      User        @relation("UserPayout", fields: [payoutUserId], references: [id], onDelete: Cascade)
+  fromUserId      String?     @db.ObjectId
+  fromUser        User?       @relation("fromUserPayoutRecived", fields: [fromUserId], references: [id], onDelete: Cascade)
+  userPaymentId   String?
+  metadata        String    
+  isWithdraw      Boolean      @default(false)
+  payoutId         String?
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model ProductReport {
+   id          String       @id @default(auto()) @map("_id") @db.ObjectId
+   userId      String       @db.ObjectId
+   user        User         @relation("ProductReport", fields: [userId], references: [id], onDelete: Cascade)
+   paymentId   String       @db.ObjectId
+   paymentAttempt PaymentAttempt @relation("ProductAttemptRelation", fields: [paymentId], references: [id], onDelete: Cascade)
+   isResolved  Boolean?       @default(false)
+   isRefund    Boolean? @default(false)
+   createdAt   DateTime      @default(now()) @map(name: "created_at")
+   updatedAt   DateTime      @updatedAt @map(name: "updated_at")
+}
+
+model Notification {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean      @default(false)
+  userId      String?       @db.ObjectId
+  url         String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  user        User?         @relation(fields: [userId], references: [id])
+
+  @@index([userId]) // Index for faster user-specific queries
+}
+
+enum NotificationType {
+  GENERAL
+  TIP
+  COMMENT
+  FOLLOW
+  SYSTEM
+  CLAP
+  LUCK
+  FIRE
+}
+
+model TipLimit {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  timeFrame     TimeFrame
+  tipLimitCount Int
+  forContent    TipContentType
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum TimeFrame {
+  DAILY
+  ALL_TIME
+  UNLIMITED
+}
+
+enum TipContentType {
+  PublicPost
+  TribePost
+  tribeShouts
+  AthleteTip
+}
+
+
+model PostTipRage {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  minTip        Float
+  maxTip        Float
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+}
+
+model AthleteTipRage {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  minTip        Float
+  maxTip        Float
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+}
+
+model UserTipShare {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  shareAmount   Float             @map("share_amount")
+  publicPostTips PublicPostTips[] @relation("UserTipShareToPublicPostTips")
+  tribePostTips  TribePostTips[]  @relation("UserTipShareToTribePostTips")
+  tribeShoutsTips  TribeShoutsTips[]  @relation("UserTipShareToTribeShoutsTips")
+  athleteTips    AthleteTips[]    @relation("UserTipShareToAthleteTips")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+}
+
+model MvpzTipShare {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  shareAmount   Float             @map("share_amount")
+  publicPostTips PublicPostTips[] @relation("MvpzTipShareToPublicPostTips")
+  tribePostTips  TribePostTips[]  @relation("MvpzTipShareToTribePostTips")
+  tribeShoutsTips  TribeShoutsTips[]  @relation("MvpzTipShareToTribeShoutsTips")
+  athleteTips    AthleteTips[]    @relation("MvpzTipShareToAthleteTips")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+}
+
+
+model PublicPostTips {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  fromUserId         String       @db.ObjectId
+  fromUser           User         @relation("UserSentTips", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId           String       @db.ObjectId
+  toUser             User         @relation("UserReceivedTips", fields: [toUserId], references: [id], onDelete: Cascade)
+  amount             Float
+  mvpzShareId        String       @db.ObjectId
+  mvpzShare          MvpzTipShare @relation("MvpzTipShareToPublicPostTips", fields: [mvpzShareId], references: [id], onDelete: Cascade)
+  userShareId        String       @db.ObjectId
+  userShare          UserTipShare @relation("UserTipShareToPublicPostTips", fields: [userShareId], references: [id], onDelete: Cascade)
+  postId             String       @db.ObjectId
+  post               Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  message            String?
+  stripeCheckoutLink String?
+  stripeCheckoutId     String?
+  isPaymentSuccess   Boolean      @default(false) 
+  isPaymentWithdrawn Boolean      @default(false) @map("is_payment_withdrawn")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+}
+
+model TribePostTips {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  fromUserId         String       @db.ObjectId
+  fromUser           User         @relation("UserSentTips", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId           String       @db.ObjectId
+  toUser             User         @relation("UserReceivedTips", fields: [toUserId], references: [id], onDelete: Cascade)
+  amount             Float
+  mvpzShareId        String       @db.ObjectId
+  mvpzShare          MvpzTipShare @relation("MvpzTipShareToTribePostTips", fields: [mvpzShareId], references: [id], onDelete: Cascade)
+  userShareId        String       @db.ObjectId
+  userShare          UserTipShare @relation("UserTipShareToTribePostTips", fields: [userShareId], references: [id], onDelete: Cascade)
+  postId             String       @db.ObjectId
+  post               Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  message            String?
+  stripeCheckoutLink String?
+  stripeCheckoutId     String?
+  isPaymentSuccess   Boolean      @default(false) 
+  isPaymentWithdrawn Boolean      @default(false) @map("is_payment_withdrawn")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+}
+
+
+model TribeShoutsTips {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  fromUserId         String       @db.ObjectId
+  fromUser           User         @relation("UserSentTips", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId           String       @db.ObjectId
+  toUser             User         @relation("UserReceivedTips", fields: [toUserId], references: [id], onDelete: Cascade)
+  amount             Float
+  mvpzShareId        String       @db.ObjectId
+  mvpzShare          MvpzTipShare @relation("MvpzTipShareToTribeShoutsTips", fields: [mvpzShareId], references: [id], onDelete: Cascade)
+  userShareId        String       @db.ObjectId
+  userShare          UserTipShare @relation("UserTipShareToTribeShoutsTips", fields: [userShareId], references: [id], onDelete: Cascade)
+  postId             String       @db.ObjectId
+  post               Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  message            String?
+  stripeCheckoutLink String?
+  stripeCheckoutId     String?
+  isPaymentSuccess   Boolean      @default(false) 
+  isPaymentWithdrawn Boolean      @default(false) @map("is_payment_withdrawn")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+}
+
+model AthleteTips {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  fromUserId         String       @db.ObjectId
+  fromUser           User         @relation("UserSentTips", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId           String       @db.ObjectId
+  toUser             User         @relation("UserReceivedTips", fields: [toUserId], references: [id], onDelete: Cascade)
+  amount             Float
+  mvpzShareId        String       @db.ObjectId
+  mvpzShare          MvpzTipShare @relation("MvpzTipShareToAthleteTips", fields: [mvpzShareId], references: [id], onDelete: Cascade)
+  userShareId        String       @db.ObjectId
+  userShare          UserTipShare @relation("UserTipShareToAthleteTips", fields: [userShareId], references: [id], onDelete: Cascade)
+
+  message            String?
+  stripeCheckoutLink String?
+  stripeCheckoutId     String?
+  isPaymentSuccess   Boolean      @default(false) 
+  isPaymentWithdrawn Boolean      @default(false) @map("is_payment_withdrawn")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+}
+
+
+model WebStripe {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId                 String         @unique
+  customerId             String? 
+  user                   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeLinked           Boolean?       @default(false)
+  createdAt              DateTime?      @default(now()) @map(name: "created_at")
+  updatedAt              DateTime?      @updatedAt @map(name: "updated_at")    
+}
+
+enum CardApprovalStatus {
+  NotRequested
+  Pending
+  AthleteUploadedApproved
+  AthleteUploadedReject
+  DesignApproved
+  DesignReject
+  CardApproved
+}
+
+model CardRequest {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  requestedBy      User     @relation("UserCardRequests", fields: [requestedById], references: [id])
+  requestedById    String   @db.ObjectId
+  originalCardImage String
+  croppedCardImage String
+  croppedCardImageWFrame String
+  cardApproval        CardApprovalStatus  @default(NotRequested)
+  cardRequestDate     DateTime 
+  bronzeCard        String?
+  sliverOneCard     String?
+  sliverTwoCard     String?
+  goldCard          String?
+  viewed              Boolean @default(false)
+  canUseSchoolLogo              Boolean @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+
+model BlockedUser {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  blocker                User           @relation("BlockingUsers", fields: [blockerId], references: [id])
+  blockerId              String         @db.ObjectId
+  blocked                User           @relation("BlockedByUsers", fields: [blockedId], references: [id])
+  blockedId              String         @db.ObjectId
+}
+
+enum Role {
+  Athlete     
+  User      
+}
+
+enum AdminRole{
+  Coach  
+  Coordinator
+  Captain  
+  Creator     
+  Spotter      
+}
+
+
+
+
+model UserFollower {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  follower  User     @relation("UserFollowing", fields: [followingId], references: [id])
+  following User     @relation("UserFollowed", fields: [followerId], references: [id])
+  followerId String  @db.ObjectId
+  followingId String @db.ObjectId
+  createdAt DateTime @default(now()) @map(name: "created_at")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SocialLink {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String @map("user_id")
+  socialBrand String
+  link        String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, socialBrand])
+}
+
+model Collection {
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  description          String
+  launchDate           DateTime
+  creatorId            String    @map("user_id")
+  creator              User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  license              String
+  smartContractAddress String?
+  blockchain           String
+  ipfsGateway          String
+  createdAt            DateTime  @default(now()) @map(name: "created_at")
+  updatedAt            DateTime  @updatedAt @map(name: "updated_at")
+}
+
+model Project {
+  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  description          String
+  launchDate           DateTime?
+  creatorId            String      @map("user_id")
+  creator              User        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  smartContractAddress String?
+  blockchain           String?
+  ipfsGateway          String?
+  createdAt            DateTime    @default(now()) @map(name: "created_at")
+  updatedAt            DateTime    @updatedAt @map(name: "updated_at")
+  nftEntities          NFTEntity[]
+}
+
+enum EnhancementDurationTypes {
+  PERMANENT
+  TEMPORARY
+}
+
+enum AnimatedEffectType {
+  GLOW
+  SPARKLE
+  FIRE
+  LIGHTNING
+  HOLOGRAPHIC
+}
+
+enum MinorEnhancementTypes {
+  PERFORMANCE_RECOGNITION
+  ATHLETE_PERSONALIZATIONS
+  AESTHETIC_ENHANCEMENTS
+}
+
+enum MinorEnhancementSubTypes {
+  BIG_GAME
+  RECORD_BREAKER
+  HOT_STREAK
+  TRUE_STRENGTH
+  FIRST_CHOICE
+  MILESTONE
+  SIGNATURE
+  PERFORMANCE_DATA
+  EFFECT
+}
+
+enum MajorEnhancementTypes{
+  PERFORMANCE_RECOGNITION
+  ATHLETE_PERSONALIZATIONS
+  AESTHETIC_ENHANCEMENTS
+  FINAL_COLLECTIBLE
+}
+
+enum MajorEnhancementSubTypes {
+ CAREER_MOMENT
+ ARTIST_COLLABORATION
+ PHOTO_UPDATE
+ TEAM_CHANGE
+ TEAM_ADD
+ BRAND_COLLABORATION
+ ARTISTS_REDESIGN
+ REDESIGN_MILESTONE
+ EXTERNAL_BRAND_DESIGN
+ GRADUATION_OR_RETIREMENT
+}
+
+
+model MinorEnhancementType {
+  id                               String                 @id @default(auto()) @map("_id") @db.ObjectId
+  type                             MinorEnhancementTypes
+  subType                          MinorEnhancementSubTypes
+  nFTMinorEnhancement              NFTMinorEnhancement[]  @relation("nFTMinorEnhancementType") 
+}
+
+model MajorEnhancementType {
+  id                               String                 @id @default(auto()) @map("_id") @db.ObjectId
+  type                             MajorEnhancementTypes
+  subType                          MajorEnhancementSubTypes 
+  nFTMinorEnhancement              NFTMajorEnhancement[]  @relation("nFTMajorEnhancementType") 
+}
+
+model NFTMinorEnhancement {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  nftEntityId String               @db.ObjectId
+  avatarsId   String               @db.ObjectId
+  avatar      Avatars              @relation("aVATARMinorEnhancement",fields: [avatarsId], references: [id])
+  nftEntity   NFTEntity            @relation("nFTMinorEnhancement",fields: [nftEntityId], references: [id])
+  duration    EnhancementDurationTypes 
+  expDate     DateTime?
+  price       Float?
+  typeId      String               @db.ObjectId
+  type        MinorEnhancementType @relation("nFTMinorEnhancementType",fields: [typeId], references: [id])
+  ver         Float
+  signatureImage String?
+  enhancementPurchases   NFTMinorEnhancementPurchase[]   @relation("MinorEnhancementPurchase")
+  createdAt   DateTime             @default(now()) @map(name: "created_at")
+  updatedAt   DateTime             @updatedAt @map(name: "updated_at")
+}
+
+enum TeamChangedReasons{
+  AUCTION
+  TRADED
+  DRAFTED
+  INJURED_PICKUP
+}
+
+model NFTMajorEnhancement {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  avatarsId   String               @db.ObjectId
+  avatar      Avatars              @relation("aVATARMajorEnhancement",fields: [avatarsId], references: [id])
+  nftEntityId String               @db.ObjectId
+  nftEntity   NFTEntity            @relation("nFTMajorEnhancement",fields: [nftEntityId], references: [id])
+  duration    EnhancementDurationTypes 
+  expDate     DateTime?
+  price       Float?
+  typeId      String               @db.ObjectId
+  type        MajorEnhancementType @relation("nFTMajorEnhancementType",fields: [typeId], references: [id])
+  ver         Float
+  avatarDescription      String?
+  cardNFTImage  String?
+  movedReason    TeamChangedReasons?
+  movedReasonDescription String?
+  tribeId         String? @db.ObjectId
+  enhancementPurchases   NFTMajorEnhancementPurchase[]   @relation("MajorEnhancementPurchase")
+  isBaseCard      Boolean? @default(false)
+  createdAt   DateTime             @default(now()) @map(name: "created_at")
+  updatedAt   DateTime             @updatedAt @map(name: "updated_at")
+}
+
+model Avatars {
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+  nftEntityId           String               @db.ObjectId
+  nftEntity             NFTEntity            @relation("nFTAvatar",fields: [nftEntityId], references: [id])
+  title                  String
+  description             String?
+  year                     String?
+  thumbnail                String?
+  tribeId                   String?         @db.ObjectId
+  tribe                      Tribe?           @relation("tribeAvatar",fields: [tribeId], references: [id])
+  minorEnhancements          NFTMinorEnhancement[]   @relation("aVATARMinorEnhancement")
+  majorEnhancements          NFTMajorEnhancement[]   @relation("aVATARMajorEnhancement")
+  createdAt   DateTime       @default(now()) @map(name: "created_at")
+  updatedAt   DateTime       @updatedAt @map(name: "updated_at")
+}
+
+
+
+model NFTEntity {
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+  address                String?
+  title                  String
+  description            String?
+  currentOwnerId         String?   @db.ObjectId
+  currentOwner           User?    @relation("entitiesOwner",fields: [currentOwnerId], references: [id])
+  type                   String
+  sport                  String?
+  rarity                 String?
+  position               String?
+  sex                    String?
+  special                String?
+  school                 String?
+  design                 String?
+  designer               String?
+  edition                String?
+  serialNumberStart      Int?
+  onboardingNo           Int?
+  medal                  String?
+  year                   String?
+  avatars                Avatars[]   @relation("nFTAvatar")
+  minorEnhancements      NFTMinorEnhancement[]   @relation("nFTMinorEnhancement")
+  majorEnhancements      NFTMajorEnhancement[]   @relation("nFTMajorEnhancement")
+  mintQuantity           Int?
+  mintDatetime           DateTime?
+  maxQuantity            Int?
+  packQuantity           Int?
+  separatelySoldQuantity Int?
+  enhancementQuantity    Int?
+  price                  Float?
+  mintAthleteShare       Float?
+  mintMvpzShare          Float?
+  tradeAthleteShare      Float?
+  tradeMvpzShare         Float?
+  mintArtistShare        Float?
+  tradeArtistShare       Float?
+  referrerShare          Float?
+  affiliateShare         Float?
+  cardImageDisplay       String?
+  cardImageNFT           String?
+  cardImageFrame         String?
+  membershipTier         String?
+  randomFactor           Int?
+  metadata  String?
+  tribe        Tribe?    @relation("entitiesTribe",fields: [tribeId], references:[id])
+  tribeId      String?  @db.ObjectId
+  athlete      User?    @relation("entitiesAthlete",fields: [athleteId], references: [id])
+  athleteId    String?  @db.ObjectId
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?  @db.ObjectId
+  mintCards NFTMintCard[] @relation("entityCards")
+  puchaseCards  NFTPurchaseCard[]
+  organisationId String? @db.ObjectId
+  tribeChallenegCards TribeChallengesCard[] @relation("NftTribeCallengesCards")
+  digitalCardList     DigitalCardList[]    @relation("nftDigitalCard")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model NFTMinorEnhancementPurchase {
+  id                     String                     @id @default(auto()) @map("_id") @db.ObjectId
+  purchaseId             String?                     @db.ObjectId
+  purchase               NFTPurchaseCard?            @relation("PurchaseCardMinorEnhancement", fields: [purchaseId], references: [id], onDelete: Cascade)
+  mintId                 String?                     @db.ObjectId
+  mintCard               NFTMintCard?                @relation("MintCardMinorEnhancement", fields: [mintId], references: [id], onDelete: Cascade)
+  nftMinorEnhancementId  String                     @db.ObjectId
+  nftMinorEnhancement    NFTMinorEnhancement?        @relation("MinorEnhancementPurchase", fields: [nftMinorEnhancementId], references: [id], onDelete: Cascade)
+  createdAt              DateTime                   @default(now()) @map(name: "created_at")
+  updatedAt              DateTime                   @updatedAt @map(name: "updated_at")
+}
+
+model NFTMajorEnhancementPurchase {
+  id                     String                     @id @default(auto()) @map("_id") @db.ObjectId
+  purchaseId             String?                     @db.ObjectId
+  purchase               NFTPurchaseCard?            @relation("PurchaseCardMajorEnhancement", fields: [purchaseId], references: [id], onDelete: Cascade)
+  mintId                 String?                     @db.ObjectId
+  mintCard               NFTMintCard?                @relation("MintCardMajorEnhancement", fields: [mintId], references: [id], onDelete: Cascade)
+  nftMajorEnhancementId  String                     @db.ObjectId
+  nftMajorEnhancement    NFTMajorEnhancement?        @relation("MajorEnhancementPurchase", fields: [nftMajorEnhancementId], references: [id], onDelete: Cascade)
+  createdAt              DateTime                   @default(now()) @map(name: "created_at")
+  updatedAt              DateTime                   @updatedAt @map(name: "updated_at")
+}
+
+
+
+model NFTPurchaseCard {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  assetName      String?
+  serialNumber   Int?
+  cardSerialNumber String?
+  purchaseDatetime DateTime?
+  purchasePrice  Float?
+  cardIssueType  String?
+  bundleType     String?
+  displayImage   String?
+  nftEntityId    String?   @db.ObjectId
+  nftEntity      NFTEntity? @relation(fields: [nftEntityId], references: [id])
+  minorEnhancementPurchases NFTMinorEnhancementPurchase[] @relation("PurchaseCardMinorEnhancement")
+  majorEnhancementPurchases NFTMajorEnhancementPurchase[] @relation("PurchaseCardMajorEnhancement")
+  currentOwnerId String?  @db.ObjectId
+  currentOwner   User?    @relation(fields: [currentOwnerId], references: [id], onDelete: Cascade)
+  status         String? @default("UNASSIGNED")
+  productId      String? @db.ObjectId
+  marketplaceCards       MarketplaceCard[] @relation("MarketplaceCardPurchaseCard")
+  tradeHistory           MarkeCardTradeHistory[] @relation("TradeHistoryPurchaseCard")
+  userChallengeCards  UserChallengeCard[] @relation("NFTPurchaseUserChallenge")
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model NFTMintCard {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  saturnId       String?
+  saturnImage    String?
+  ipfsGateway    String?  
+  address        String?
+  assetName      String?
+  saturnResponse String?
+  serialNumber   String?
+  displayImage   String?
+  cardSerialNumber String?
+  mintDatetime   DateTime?
+  mintPrice      Float?
+  nftEntityId    String?   @db.ObjectId
+  nftEntity      NFTEntity? @relation("entityCards",fields: [nftEntityId], references: [id])
+  minorEnhancementPurchases   NFTMinorEnhancementPurchase[] @relation("MintCardMinorEnhancement")
+  majorEnhancementPurchases   NFTMajorEnhancementPurchase[] @relation("MintCardMajorEnhancement")
+  currentOwnerId String?  @db.ObjectId
+  currentOwner   User?    @relation(fields: [currentOwnerId], references: [id], onDelete: Cascade)
+  metadata       String?
+  assetTransferLogs AssetTransferLog[]
+  challengeId    String? @db.ObjectId
+  marketplaceCards       MarketplaceCard[] @relation("MarketplaceCardMintCard")
+  tradeHistory           MarkeCardTradeHistory[] @relation("TradeHistoryMintCard")
+  userChallengeCards  UserChallengeCard[] @relation("NFTMintUserChallenge")
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+}
+
+
+
+model UserSubscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      String
+  email     String?
+  userId    String? @map("user_id")
+  user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model CartItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  productType String // "card", "pack", "apparel"
+  quantity  Int     @default(1)
+  price     Float
+  entityId  String? @db.ObjectId  // For cards linking to nftEntity
+  extraProductId String? @db.ObjectId // For base card reference
+  
+  // Relation to PaymentAttempt
+  paymentAttemptId String @db.ObjectId
+  paymentAttempt   PaymentAttempt @relation(fields: [paymentAttemptId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+
+  @@map("cart_items")
+}
+
+
+model PaymentAttempt {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  quantity  Int
+  totalPrice Float
+  token     String?
+  userId    String? @map("user_id")
+  user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  verifiedAt DateTime?
+  mintedAt  DateTime?
+  failedAt  DateTime?
+  custodialWalletAddress String?
+  network   String?
+  stripeCheckoutLink String?
+  stripePriceId String?
+  cardIssueType String?
+  bundleType  String?
+  platform  String?
+  paymentStatus String?
+  marketCardId String? @db.ObjectId
+  entityId  String?
+  packQuantity Int?
+  collection String?
+  productId String? @db.ObjectId
+  extraProductId String? @db.ObjectId
+  order     ApparelOrder?
+  serialNumber String? 
+  stripeSessionId String?
+  stripeCheckoutId String?
+  paymentMethodId String? @db.ObjectId
+  paymentMethod PaymentMethod? @relation(fields:[paymentMethodId], references: [id])
+  productReports   ProductReport[] @relation("ProductAttemptRelation")
+  cartItems CartItem[]
+}
+
+
+
+model TradeSellingStartPrice{
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  price          Float
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model TradeMvpzShare{
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  share          Float
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+}
+
+
+model MarketplaceCard {
+  id                     String           @id @default(auto()) @map("_id") @db.ObjectId
+  title                  String?
+  description            String?
+  nftPurchaseCardId      String? @db.ObjectId
+  nftPurchaseCard        NFTPurchaseCard? @relation("MarketplaceCardPurchaseCard", fields: [nftPurchaseCardId], references: [id])
+  nftMintCardId          String? @db.ObjectId
+  nftMintCard            NFTMintCard? @relation("MarketplaceCardMintCard", fields: [nftMintCardId], references: [id])
+  sellingPrice           Float  
+  sellerId               String? @db.ObjectId
+  seller                 User? @relation("MarketplaceCardSeller", fields: [sellerId], references: [id])
+  likes                  MarketplaceCardLikes[]  @relation("makerketplaceLikes")   
+  wishlist               WishlistedMarketPlaceCard[]  @relation("MarketplaceCardWishlist")
+  isLive                 Boolean?   @default(true)   
+  isSoldOut              Boolean?   @default(false)        
+  createdAt              DateTime? @default(now()) @map(name: "created_at")
+  updatedAt              DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model MarketplaceCardLikes {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String  @db.ObjectId
+  user          User    @relation("MarketplaceCardUserLikes",fields: [userId], references: [id])
+  marketplaceCardId String  @db.ObjectId
+  marketplaceCard MarketplaceCard @relation("makerketplaceLikes",fields: [marketplaceCardId], references: [id])
+  createdAt     DateTime @default(now()) @map(name: "created_at")
+  @@unique([userId, marketplaceCardId]) // Ensure a user can like a card only once
+}    
+
+model WishlistedMarketPlaceCard {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String  @db.ObjectId
+  user          User    @relation("MarketplaceCardUserWishlist",fields: [userId], references: [id])
+  marketplaceCardId String  @db.ObjectId
+  marketplaceCard MarketplaceCard @relation("MarketplaceCardWishlist",fields: [marketplaceCardId], references: [id])
+  createdAt     DateTime @default(now()) @map(name: "created_at")
+  @@unique([userId, marketplaceCardId]) // Ensure a user can wishlist a card only once
+}
+
+
+
+
+
+model MarkeCardTradeHistory {
+  id                     String           @id @default(auto()) @map("_id") @db.ObjectId
+  buyerId                String? @db.ObjectId
+  buyer                  User? @relation("TradeHistoryBuyer", fields: [buyerId], references: [id])
+  buyAtPrice             Float
+  nftPurchaseCardId      String? @db.ObjectId
+  nftPurchaseCard        NFTPurchaseCard? @relation("TradeHistoryPurchaseCard", fields: [nftPurchaseCardId], references: [id])
+  nftMintCardId          String? @db.ObjectId
+  nftMintCard            NFTMintCard? @relation("TradeHistoryMintCard", fields: [nftMintCardId], references: [id])
+  createdAt              DateTime? @default(now()) @map(name: "created_at")
+  updatedAt              DateTime? @updatedAt @map(name: "updated_at")
+}
+
+ 
+
+model XPFactor {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  type           String
+  membershipTier String?
+  factorValue    Int
+}
+
+model Wallet {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  type           String
+  address        String @unique
+  name           String?
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+  userId         String @map("user_id")
+  user           User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AssetTransferLog {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  assetName     String
+  oldAddress    String
+  newAddress    String
+  createdAt     DateTime? @default(now()) @map(name: "created_at")
+  updatedAt     DateTime? @updatedAt @map(name: "updated_at")
+  nftMintCardId String @db.ObjectId
+  nftMintCard   NFTMintCard @relation(fields: [nftMintCardId], references: [id], onDelete: Cascade)
+}
+
+model ReferralUsers {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  referralCode   String?
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+  userId         String? @map("user_id")
+}
+
+model Referrals {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+  userId         String @db.ObjectId
+  referredByUserId String @db.ObjectId
+  referralInviteId String? @db.ObjectId
+}
+
+model ReferralInvite {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+  referredByUserId String @db.ObjectId
+  inviteCode     String?
+  productId      String? @db.ObjectId
+  expiryDate     DateTime?
+  socialMedia    String?
+}
+
+enum PrekTypes {
+  COLLECTABLE
+  TICKET
+}
+
+enum CollectableTypes{
+  PHYSICAL
+  DIGITAL
+}
+
+
+model ChallengesMedia {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  media            String
+  TribeChallengeId String   @db.ObjectId
+  TribeChallenge   TribeChallenges? @relation("TribeChallengeMedia", fields: [TribeChallengeId], references: [id], onDelete: Cascade)
+  createdAt        DateTime? @default(now()) @map(name: "created_at")
+  updatedAt        DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model DigitalCardList {
+   id               String   @id @default(auto()) @map("_id") @db.ObjectId
+   nftId            String   @db.ObjectId
+   nftEntity        NFTEntity @relation("nftDigitalCard", fields:[nftId], references: [id], onDelete: Cascade)
+   collectableId    String   @db.ObjectId
+   collectable      PerkDigitalCollectable  @relation("perkDigitalCard", fields:[collectableId], references: [id], onDelete: Cascade)
+   createdAt        DateTime? @default(now()) @map(name: "created_at")
+   updatedAt        DateTime? @updatedAt @map(name: "updated_at")
+}
+
+
+
+model PerkDigitalCollectable {
+  id                          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                       String
+  digitalCardList             DigitalCardList[] @relation("perkDigitalCard")
+  createdAt                   DateTime? @default(now()) @map(name: "created_at")
+  challengePerkCollectable    ChallengePerkCollectable? @relation("challengePerk", fields: [challengePerkId], references: [id], onDelete: Cascade)
+  challengePerkId            String?  @db.ObjectId
+  updatedAt                   DateTime? @updatedAt @map(name: "updated_at")
+
+}
+
+
+model PerkPhysicalCollectable {
+  id                          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                       String
+  description                 String
+  image                       String?
+  createdAt                   DateTime? @default(now()) @map(name: "created_at")
+  challengePerkCollectable    ChallengePerkCollectable? @relation("challengePerk", fields: [challengePerkId], references: [id], onDelete: Cascade)
+  challengePerkId            String?  @db.ObjectId
+  updatedAt                   DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model ChallengePerkCollectable {
+  id                         String   @id @default(auto()) @map("_id") @db.ObjectId
+  collectableType            CollectableTypes
+  perkDigitalCollectables     PerkDigitalCollectable[] @relation("challengePerk")
+  perkPhysicalCollectables   PerkPhysicalCollectable[] @relation("challengePerk")
+  tribeChallengeId           String?  @db.ObjectId
+  tribeChallenge             TribeChallenges?  @relation("ChallengePerk_collectable", fields: [tribeChallengeId], references: [id], onDelete: Cascade)
+  createdAt                  DateTime? @default(now()) @map(name: "created_at")
+  updatedAt                  DateTime? @updatedAt @map(name: "updated_at")
+}
+
+enum TicketTypes{
+  EntryPass   
+  NMatchTicket
+  VMatchTicket
+  ConcertTicket
+}
+
+model ChallengePerkTicket {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  ticketType      TicketTypes
+  eventTitle      String
+  stadiumName     String?
+  eventLocation   String?
+  eventDate       DateTime?
+  tickExp         DateTime?
+  tribeChallengeId           String?  @db.ObjectId
+  tribeChallenge             TribeChallenges?  @relation("ChallengePerk_ticket", fields: [tribeChallengeId], references: [id], onDelete: Cascade)
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+
+model TribeChallenges {
+  id                          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                       String
+  description                 String?
+  perkType                    PrekTypes?
+  ticketType                  String?
+
+  collectable                 ChallengePerkCollectable[] @relation("ChallengePerk_collectable")
+  ticket                 ChallengePerkTicket[] @relation("ChallengePerk_ticket")
+
+  perkDescription             String?
+  perkMedia                   ChallengesMedia[] @relation("TribeChallengeMedia")
+  perkXP                      Int?      
+  startDate                   DateTime?
+  endDate                     DateTime?
+  challengeCards              TribeChallengesCard[] @relation("TribeChallengesCards")
+
+  tribeId                     String   @db.ObjectId
+  tribe                       Tribe?   @relation("TribeChallengesTribe", fields: [tribeId], references: [id], onDelete: Cascade)
+
+  userChallenges              UserChallenge[] @relation("TribeChallengesUserChallenges")
+  challengeLimit              Int
+
+  createdAt                   DateTime? @default(now()) @map(name: "created_at")
+  updatedAt                   DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model TribeChallengesCard {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  title          String?
+  type           String
+  challengeId    String   @db.ObjectId
+  challenge      TribeChallenges? @relation("TribeChallengesCards", fields:[challengeId], references: [id], onDelete: Cascade)
+  nftEntityId   String @db.ObjectId
+  nftEntity      NFTEntity? @relation("NftTribeCallengesCards", fields:[nftEntityId], references: [id], onDelete: Cascade)
+  createdAt      DateTime? @default(now()) @map(name: "created_at")
+  updatedAt      DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model UserChallenge {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String @db.ObjectId
+  user                User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId         String @db.ObjectId
+  challenge           TribeChallenges @relation("TribeChallengesUserChallenges", fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeCards      UserChallengeCard[] @relation("userChallengeCards")
+  challengeCompleted  Boolean @default(false)
+  xpEarn              Int?
+  createdAt           DateTime? @default(now()) @map(name: "created_at")
+  updatedAt           DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model UserChallengeCard {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userChallengeId String?   @db.ObjectId
+  userChallenge   UserChallenge? @relation("userChallengeCards",fields:[userChallengeId], references: [id], onDelete: Cascade)
+  nftPurchaseCardId   String?   @db.ObjectId
+  nftPurchaseCard     NFTPurchaseCard? @relation("NFTPurchaseUserChallenge", fields: [nftPurchaseCardId], references: [id], onDelete: Cascade)
+  nftMintCardId       String?   @db.ObjectId
+  nftMintCard         NFTMintCard? @relation("NFTMintUserChallenge", fields: [nftMintCardId], references: [id], onDelete: Cascade)
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model Product {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  type            ProductTypes
+  subType         ProductSubTypes?
+  name            String
+  description     String?
+  productCode     String?
+  cost            Float
+  stripePriceId   String?
+  minCount        Int?
+  minAthletes     Int?
+  isActive        Boolean @default(true)
+  issueType       ProductIssueType @default(digital)
+  packQuantity    Int?
+  collection      String?
+  allowDuplicates Boolean @default(false)
+  images          String[]
+  shortName       String?
+  inspiration     String?
+  features        String?
+  availability    Int?
+  category        String?
+  subCategory     String?
+  shippingCost    Int?
+  costBeforeDiscount Float?
+  variants        ProductVariant[]
+  specificationId String? @db.ObjectId
+  specification   ProductSpecification? @relation(fields: [specificationId], references: [id])
+  designId        String? @db.ObjectId
+  design          ProductDesign? @relation(fields: [designId], references: [id])
+  additionalId    String? @db.ObjectId
+  additional      ProductAdditional? @relation(fields: [additionalId], references: [id])
+  orders          ApparelOrder[]
+  teamId          String? @db.ObjectId
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+enum ProductTypes{
+  packs
+  single
+  athlete
+  kstate_packs
+  kstate_collection
+  kstate_athlete
+  apparel
+}
+
+enum ProductSubTypes{
+  athleisure
+  offside
+  accessories
+}
+
+enum ProductIssueType{
+  digital
+  digitalphysical
+  physical
+}
+
+model ProductVariant {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  variantName     String
+  variantCode     String?
+  shortName       String?
+  availabilityType String?
+  availabilityCount Int?
+  stripePriceId   String?
+  image           String?
+  shippingTime    String?
+  sizes           String[]
+  productId       String @db.ObjectId
+  product         Product @relation(fields: [productId], references: [id])
+  orders          ApparelOrder[]
+  variantSizes    ProductVariantSize[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model ProductVariantSize {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  variantId       String @db.ObjectId
+  size            String
+  availabilityCount Int?
+  currentIndex    Int @default(1)
+  sizeCode        String?
+  variant         ProductVariant @relation(fields: [variantId], references: [id])        
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model ProductSpecification {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  material        String
+  gender          String
+  fitType         String
+  sizes           String[]
+  products        Product[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model ProductDesign {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  background      String?
+  philosophy      String
+  designerId      String?
+  availability    String?
+  products        Product[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model ProductAdditional {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  careInstructions String
+  returns         String
+  shipping        String
+  products        Product[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+enum OrderStatus {
+  CREATED
+  ORDERED
+  SHIPPED
+  DELIVERED
+  REFUNDED
+}
+
+model ApparelOrder {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber     String @unique
+  quantity        Int @default(1)
+  size            String
+  fitType         String
+  gender          String
+  productId       String @db.ObjectId
+  product         Product? @relation(fields: [productId], references: [id])
+  variantId       String @db.ObjectId
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
+  userId          String @db.ObjectId
+  user            User? @relation(fields:[userId], references: [id])
+  status          OrderStatus @default(CREATED) 
+  shippingCost    Int @default(0)
+  productReferralCode String?
+  paymentAttemptId String @unique @db.ObjectId
+  paymentAttempt  PaymentAttempt? @relation(fields: [paymentAttemptId], references: [id])
+  addressId       String? @db.ObjectId
+  address         UserAddress? @relation(fields:[addressId], references: [id])
+  serialNumber    String?
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model PaymentMethod {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  type            String
+  brand           String?
+  country         String?
+  expMonth        Int?
+  expYear         Int?
+  last4           String?  
+  userId          String @db.ObjectId
+  user            User? @relation(fields:[userId], references: [id])
+  paymentAttempts PaymentAttempt[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model UserAddress {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  type            String
+  city            String
+  country         String
+  line1           String
+  line2           String?
+  postalCode      String
+  state           String?
+  userId          String @db.ObjectId
+  user            User? @relation(fields:[userId], references: [id])
+  orders          ApparelOrder[]
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model Team {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  gender          Genders
+  organisationId  String @db.ObjectId
+  organisation    Organisation @relation(fields:[organisationId], references:[id])
+  sport           Sports?
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+model Organisation {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  type            OrganisationTypes @default(SCHOOL)
+  name            String @unique
+  fullName        String?
+  schoolUrl       String?
+  schoolIcon      String?
+  league          String?
+  division        String?
+  location        String?
+  conference      String?
+  schoolWebsite   String?
+  detailedSchoolName String?
+  socialLinks     SocialMediaLink[]
+  colors          String?
+  primaryColor    String?
+  secondaryColor  String?
+  ternaryColor    String?
+  primaryColorHex    String?
+  secondaryColorHex  String?
+  ternaryColorHex    String?
+  cardPrimaryColorHex    String?
+  cardSecondaryColorHex  String?
+  cardTernaryColorHex    String?
+  country          String?
+  shortName       String?
+  nickName        String?
+  teams           Team[]
+  tribe           Tribe[]    @relation("OrganisationTribe")
+  users           User[]
+  cardColorPallet     CardColorPallet?  @relation("OrganisationCardColorPallet", fields: [cardColorPalletId], references: [id])
+  cardColorPalletId   String?           @db.ObjectId
+   deactivate         Boolean? @default(false)
+  isDeleted          Boolean? @default(false)
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model CardColorPallet {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  cardShadow          String          @default("[]")
+  cardCornerShadow    String          @default("[]")
+  cardCornerTriangle  String          @default("[]")
+  mascotLogo          String          @default("[]")
+  doubleLine          String?         @default("[\"#886A2F\", \"#886A2F\"]")
+  geometricShape      String?         @default("#D9D9D9")
+  borderColor         String?         @default("#FEFEFE")
+  organisations       Organisation[]    @relation("OrganisationCardColorPallet")  // Adjusted to one-to-many
+  tribe               Tribe[]          @relation("TribeCardColorPallet")
+}
+
+
+
+enum Genders{
+  Men
+  Women
+}
+
+enum OrganisationTypes{
+  SCHOOL
+  UNIVERSITY
+  ORGANIZATION
+}
+
+enum Sports {
+  BASEBALL
+  BASKETBALL
+  BEACH_VOLLEYBALL
+  BOWLING
+  CROSS_COUNTRY
+  FENCING
+  FIELD_HOCKEY
+  FOOTBALL
+  GOLF
+  GYMNASTICS
+  ICE_HOCKEY
+  LACROSSE
+  RIFLE
+  ROWING
+  SKIING
+  SOCCER
+  SOFTBALL
+  SWIMMING
+  TENNIS
+  TRACK_AND_FIELD
+  VOLLEYBALL
+  WATER_POLO
+  WRESTLING
+}
+
+model PayoutPercentage {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  signup          Float
+  productReferral Float
+}
+
+model Payout {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  type            PayoutType
+  orderAmount     Float
+  payoutAmount    Float
+  userId          String @db.ObjectId
+  orderId         String @db.ObjectId
+  payoutPercentage Float
+  payoutPercentageType String
+  createdAt       DateTime? @default(now()) @map(name: "created_at")
+  updatedAt       DateTime? @updatedAt @map(name: "updated_at")
+}
+
+enum PayoutType {
+  Apparel
+  NFT
+}
+
+model Post {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  thumbnail              String?
+  message                String
+  media                  Media[]      
+  comments               Comment[]    
+  shares                 Share[] 
+  userId                 String        @db.ObjectId
+  postedBy               User?          @relation(fields: [userId], references: [id], onDelete: Cascade)  
+  likes                  Like[]  
+  claps                  Clap[]       
+  clovers                Clover[]     
+  bolts                  Bolt[]   
+  hiddenBy               HiddenPost[]
+  deactivate         Boolean? @default(false)
+  isDeleted          Boolean? @default(false)
+  publicPostTips         PublicPostTips[]
+  tribePostTips          TribePostTips[]
+  tribeShoutsTips        TribeShoutsTips[]
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+}
+
+model HiddenPost {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  user                   User           @relation(fields: [userId], references: [id])
+  userId                 String         @db.ObjectId
+  post                   Post           @relation(fields: [postId], references: [id])
+  postId                 String         @db.ObjectId
+
+  @@unique([userId, postId]) // unique constraint to prevent duplicates
+}
+
+
+model Media {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  mediaType  MediaType
+  thumbnail  String?
+  postId     String   @db.ObjectId
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+enum MediaType {
+  image
+  video
+}
+
+model Comment {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment     String
+  replies     Reply[]      
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Reply {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reply       String
+  commentId   String       @db.ObjectId
+  comment     Comment      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Share {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Like {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Clap {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Clover {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model Bolt {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String        @db.ObjectId
+  postedBy    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+  
+model Athlete {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  SchoolName  String?
+  Sport       String?
+  Name        String?
+  Position    String?
+  Height      String?
+  Weight      String?
+  Class       String?
+  Hometown    String?
+  HighSchool  String?
+  PreviousSchool String?
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TMedia {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  mediaType  MediaType
+  postId     String    @db.ObjectId
+  post       TribePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TComment {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment     String
+  replies     TReply[]
+
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TReply {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reply       String
+  commentId   String       @db.ObjectId
+  comment     TComment     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TShare {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TLike {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TClap {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TClover {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TBolt {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  postedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId      String       @db.ObjectId
+  post        TribePost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TribePost {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId                String         @db.ObjectId
+  tribe                  Tribe          @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  thumbnail              String?
+  message                String
+  media                  TMedia[]
+  comments               TComment[]
+  shares                 TShare[]
+  userId                 String         @db.ObjectId
+  postedBy               User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes       TLike[]
+  claps                  TClap[]
+  clovers                TClover[]
+  bolts                  TBolt[]
+  hiddenBy               HiddenTribePost[]
+  deactivate         Boolean? @default(false)
+  isDeleted          Boolean? @default(false)
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model HiddenTribePost {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  user                   User           @relation(fields: [userId], references: [id])
+  userId                 String         @db.ObjectId
+  tribePost              TribePost      @relation(fields: [tribePostId], references: [id])
+  tribePostId            String         @db.ObjectId
+
+  @@unique([userId, tribePostId]) // unique constraint to prevent duplicates
+}
+
+
+model TribeShout {
+  id                     String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  tribeId                String         @db.ObjectId
+  tribe                  Tribe          @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  userId                 String         @db.ObjectId
+  postedBy               User           @relation("UserPostedShouts", fields: [userId], references: [id])
+  thumbnail              String?
+  message                String
+  likes                  TShtLike[]    
+  comments               TShtComment[]
+  media                  TShtMedia[]
+  shares                 TShtShare[]
+  claps                  TShtClap[]
+  clovers                TShtClover[]
+  bolts                  TShtBolt[]
+  hiddenBy               HiddenShout[]
+  isMemberOnly           Boolean @default(true)
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+ 
+}
+
+model HiddenShout {
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  user                   User           @relation(fields: [userId], references: [id])
+  userId                 String         @db.ObjectId
+  shout                  TribeShout     @relation(fields: [shoutId], references: [id])
+  shoutId                String         @db.ObjectId
+
+  @@unique([userId, shoutId]) // unique constraint to prevent duplicates
+}
+
+model TShtMedia {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  mediaType  MediaType
+  shoutId     String    @db.ObjectId
+  shout       TribeShout @relation(fields: [shoutId], references: [id], onDelete: Cascade)
+   createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+
+model TShtComment {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedComments", fields: [userId], references: [id])
+  comment     String
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+ 
+  replies     TShtReply[]    @relation("CommentReplies")
+  
+    createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TShtReply {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedReplies", fields: [userId], references: [id])
+  reply       String
+  commentId   String         @db.ObjectId
+  comment     TShtComment     @relation("CommentReplies", fields: [commentId], references: [id])
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TShtShare {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedShares", fields: [userId], references: [id])
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+    createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TShtLike {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedLikes", fields: [userId], references: [id])
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+
+model TShtClap {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedClaps", fields: [userId], references: [id])
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+   createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TShtClover {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedClovers", fields: [userId], references: [id])
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TShtBolt {
+  id          String         @id @default(auto()) @map(name: "_id") @db.ObjectId
+  userId      String         @db.ObjectId
+  postedBy    User           @relation("UserPostedBolts", fields: [userId], references: [id])
+  shoutId     String         @db.ObjectId
+  shout       TribeShout     @relation(fields: [shoutId], references: [id])
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TribeAthlete {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId   String   @db.ObjectId
+  tribe     Tribe    @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  athlete   User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation to User
+  active    Boolean
+  movedTo          String?
+  movedReason      TeamChangedReasons?
+  movedReasonDescriptions String?
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+
+model TribeMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId   String   @db.ObjectId
+  tribe     Tribe    @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  member    User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation to User
+  joinedAt  DateTime @default(now())
+  createdAt              DateTime?      @default(now())
+  updatedAt              DateTime?      @updatedAt
+}
+
+model Tribe {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId           String?           
+  tribeName         String? 
+  tribeShortName    String?
+  tribeFanCreatedName String?
+  tribeLogo         String?
+  tribeMascotLogo        String?
+  tribeVerticalBanner String?
+  tribeHorizontalBanner String?
+  about             String?
+  post              TribePost[]
+  shouts            TribeShout[]
+  athletes          TribeAthlete[]  // Many-to-many relation handled by join table
+  media             TribeMedia[]    @relation("tribeMedia")
+  live              TribeLive[]     @relation("tribeLive")
+  upcomingEvents    TribeEvent[]    @relation("tribeEvents")
+  members           TribeMember[]   // Many-to-many relation handled by join table
+  colors          String?
+  primaryColor    String?
+  secondaryColor  String?
+  ternaryColor    String?
+  primaryColorHex    String?
+  secondaryColorHex  String?
+  ternaryColorHex    String?
+  socialLinks            SocialMediaLink[]
+  organisationId    String          @db.ObjectId
+  isPrimary         Boolean?         
+  organisation      Organisation    @relation("OrganisationTribe", fields: [organisationId], references: [id])
+  cardColorPallet     CardColorPallet?  @relation("TribeCardColorPallet", fields: [cardColorPalletId], references: [id])
+  cardColorPalletId   String?           @db.ObjectId
+  leagueId          String? @db.ObjectId
+  league             League?  @relation("TribeLeague", fields: [leagueId], references: [id])
+  tribeChallenges        TribeChallenges[] @relation("TribeChallengesTribe")
+  entities           NFTEntity[] @relation("entitiesTribe")
+  avatars             Avatars[]   @relation("tribeAvatar")
+  deactivate         Boolean? @default(false)
+  isDeleted          Boolean? @default(false)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+
+model League {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  shortName  String
+  startDate  DateTime
+  endDate    DateTime
+  logo       String?
+  banner     String?
+  horizontalBanner  String?
+  verticalBanner    String?
+  tribe      Tribe[] @relation("TribeLeague")
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @updatedAt @map(name: "updated_at")
+}
+
+enum SocialMediaPlatform {
+  INSTAGRAM
+  X
+  TIKTOK
+  YOUTUBE
+  LINKEDIN
+}
+
+model SocialMediaLink {
+  id             String               @id @default(auto()) @map("_id") @db.ObjectId
+  name           SocialMediaPlatform  // Enum to restrict to specific platforms
+  link           String               // URL to the social media page
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  organisation   Organisation?        @relation(fields: [organisationId], references: [id])
+  organisationId String?              @db.ObjectId
+
+  tribe          Tribe?               @relation(fields: [tribeId], references: [id])
+  tribeId        String?              @db.ObjectId
+}
+
+
+model TribeMedia {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId     String         @db.ObjectId
+  tribe       Tribe          @relation("tribeMedia", fields: [tribeId], references: [id])
+  imageUrl         String
+  title       String
+  description String?
+  uploadedOn  DateTime        @default(now())
+  articleUrl  String
+  createdAt       DateTime? @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+}
+
+model TribeLive {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId     String         @db.ObjectId
+  tribe       Tribe          @relation("tribeLive", fields: [tribeId], references: [id])
+  url         String
+  title       String
+  description String?
+  uploadedOn  DateTime        @default(now())
+ createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+model TribeEvent {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  tribeId     String       @db.ObjectId
+  tribe       Tribe        @relation("tribeEvents", fields: [tribeId], references: [id])
+  title       String
+  description String
+  uploadedOn  DateTime     @default(now())
+  date        DateTime     
+  eventUrl    String
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+enum AthleteWaitlistStatus {
+  UnderReview
+  Approved
+  Rejected
+}
+
+model AthleteWaitlist {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?       @unique
+  email       String        @unique
+  socialMedia String?
+  tribeName     String?
+  position      String?
+  sport         String?
+  isActive    Boolean       @default(false)
+  isApproved  AthleteWaitlistStatus  @default(UnderReview)
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
+
+
+model LogError {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  developerRefDescription String?
+  errorLog     String
+  apiName      String
+  collection   String
+  createdAt         DateTime?        @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?        @updatedAt @map(name: "updated_at")
+}
