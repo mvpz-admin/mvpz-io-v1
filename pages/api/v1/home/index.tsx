@@ -60,10 +60,10 @@ const Section1EnhCards = async () => {
 };
 
 const Section2Fanzone = async ({ user }) => {
-  const shouts = await prisma.tribeShout
+  const shouts = await prisma.post
     .findMany({
       where: {
-        isMemberOnly:false,
+        // isMemberOnly:false,
         thumbnail: {
           not: null,
         },

@@ -1,5 +1,5 @@
 export const JWT_SECRET_KEY = process.env.JWT_SECRET
-export const BB_BASE_URL = "https://f005.backblazeb2.com/file/mvpz-crickit"
+export const BB_BASE_URL = "https://f005.backblazeb2.com/file/mvpz-ncaa"
 
 export const disableBodyScroll = () => {
   document.body.style.overflow = "hidden";

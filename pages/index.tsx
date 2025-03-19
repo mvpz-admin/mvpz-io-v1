@@ -111,7 +111,7 @@ const Index = () => {
           </div>
            {/* Top Posts */}
            <div className="relative w-full md:px-10 px-2 mb-10">
-            <HomeFanzone fanzone={pageData?.fanzone} loading={pageDataLoading} />
+           <HomeFanzone fanzone={pageData?.fanzone} loading={pageDataLoading} />
           </div>
           {/* Athletes */}
           <div className="relativew-full space-y-4 mb-10">

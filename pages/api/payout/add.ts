@@ -832,6 +832,177 @@ const updateDetails = async () => {
   );
 };
 
+const createAvatar = async () => {
+  const avatars = await prisma.avatars.findMany({
+    include : {
+      nftEntity : {
+        include : {
+          athlete : true
+        }
+      },
+      tribe : true,
+    }
+  });
+
+  await Promise.all(
+    avatars.map(async (ava) => {
+
+      let type = await prisma.majorEnhancementType.create({
+        data : {
+          type : "ATHLETE_PERSONALIZATIONS",
+          subType : "TEAM_ADD"
+        }
+      })
+
+      await prisma.nFTMajorEnhancement.create({
+        data: {
+         nftEntityId : ava.nftEntity.id,
+         title : ava.nftEntity.title,
+         avatarsId : ava.id,
+         typeId : type.id,
+         ver :1,
+         cardNFTImage : `/entities/prod/${ava.nftEntity.athlete.username}/nft_${ava.nftEntity.membershipTier}_${ava.nftEntity.design?.split(" ")?.join("-")}.png`,
+         isBaseCard : true,
+         duration :"PERMANENT"
+        }
+      });
+    })
+  );
+};
+
+
+
+const updateDetails0 = async () => {
+  let users = await prisma.user.findMany();
+
+  // Use Promise.all to handle async updates in parallel
+  await Promise.all(
+    users.map(async (user) => {
+      // Update only if the username is modified
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { username: "@" + user?.email?.split("@")[0] },
+      });
+    })
+  );
+};
+
+const updateDetails1 = async () => {
+  let users = await prisma.user.findMany();
+
+  // Use Promise.all to handle async updates in parallel
+  await Promise.all(
+    users.map(async (user) => {
+      // Update only if the username is modified
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          profileImage: user?.profileImage?.includes("https://")
+            ? user?.profileImage
+            : `/user-profiles/prod/${user?.username}/profile.png`,
+          bannerImage: user?.bannerImage?.includes("https://")
+            ? user?.bannerImage
+            : `/user-profiles/prod/${user?.username}/banner.png`,
+          verticalImage: user?.profileImage?.includes("https://")
+            ? user?.profileImage
+            : `/user-profiles/prod/${user?.username}/profile.png`,
+        },
+      });
+    })
+  );
+};
+
+const updateDetails12 = async () => {
+  let tribes = await prisma.tribe.findMany({
+    include: {
+      organisation: true,
+    },
+  });
+
+  // Use Promise.all to handle async updates in parallel
+  await Promise.all(
+    tribes.map(async (tribe) => {
+      let tribeId = `@${tribe.organisation?.shortName
+        ?.toLowerCase()
+        ?.split(" ")
+        ?.join("_")}`;
+      let tribeShortName = tribe.organisation?.shortName;
+      let tribeName = tribe.organisation.name;
+
+      // Update only if the username is modified
+      await prisma.tribe.update({
+        where: { id: tribe.id },
+        data: { tribeId, tribeShortName, tribeName },
+      });
+    })
+  );
+};
+
+const updateDetails13 = async () => {
+  let tribes = await prisma.tribe.findMany({
+    include: {
+      organisation: true,
+    },
+  });
+
+  // Use Promise.all to handle async updates in parallel
+  await Promise.all(
+    tribes.map(async (tribe) => {
+      let tribeMascotLogo = `/tribes/prod/${tribe.tribeId}/tribeMascotLogo.png`;
+      let tribeLogo = `/tribes/prod/${tribe.tribeId}/tribeLogo.png`;
+      let tribeVerticalBanner = `/tribes/prod${tribe.tribeId}/tribeVerticalBanner.png`;
+      let tribeHorizontalBanner = `/tribes/prod/${tribe.tribeId}/tribeHorizontalBanner.png`;
+
+      // Update only if the username is modified
+      await prisma.tribe.update({
+        where: { id: tribe.id },
+        data: {
+          tribeMascotLogo,
+          tribeLogo,
+          tribeVerticalBanner,
+          tribeHorizontalBanner,
+        },
+      });
+    })
+  );
+};
+
+const updateDetails14 = async () => {
+  let posts = await prisma.tribeShout.findMany({
+    include: {
+      media: true,
+    },
+  });
+
+  // Use Promise.all to handle async updates in parallel
+  await Promise.all(
+    posts.map(async (post) => {
+      if (!post.media || post.media.length === 0) return;
+
+      let mediaHtml = post.media
+        .map(
+          (m, idx) =>
+            `<br/> <img src="https://f005.backblazeb2.com/file/mvpz-ncaa/posts/prod/post_${
+              post.id
+            }/${m.mediaType}/p${idx + 1}.png"/>`
+        )
+        .join("");
+
+      let message = `${post.message || ""} ${mediaHtml}`;
+
+      await prisma.tribeShout.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          message,
+          thumbnail: `https://f005.backblazeb2.com/file/mvpz-ncaa/posts/prod/post_${post.id}/${post.media[0].mediaType}/p1.png`,
+        },
+      });
+    })
+  );
+};
+
 const updateDetails2 = async () => {
   let nftEntitys = await prisma.nFTEntity.findMany({
     select: {
@@ -1230,7 +1401,12 @@ const updateDetails9 = async () => {
   await prisma.tribeShout.updateMany({
     where: {
       id: {
-        in: ["67c59ba87b729241dcbc03d6", "67c59ba87b729241dcbc03d7","67c59ba97b729241dcbc03d8","67c59ba97b729241dcbc03d9"]
+        in: [
+          "67c59ba87b729241dcbc03d6",
+          "67c59ba87b729241dcbc03d7",
+          "67c59ba97b729241dcbc03d8",
+          "67c59ba97b729241dcbc03d9",
+        ],
       },
     },
     data: {
@@ -1249,7 +1425,7 @@ export default async function handler(
 
   try {
     //
-    let response = await updateDetails9();
+    let response = await createAvatar();
     //
     /// ------------------ update userXp --------------
 
