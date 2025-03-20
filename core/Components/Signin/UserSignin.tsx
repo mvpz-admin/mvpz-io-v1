@@ -68,7 +68,8 @@ const UserSignin = () => {
 
 
   const login = useGoogleLogin({
-    onSuccess: tokenResponse => handleGoogleVerify(tokenResponse)
+    onSuccess: tokenResponse => handleGoogleVerify(tokenResponse),
+      flow: 'implicit',  // Ensure this is correct
   });
 
 
