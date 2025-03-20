@@ -78,7 +78,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       >
         <Notifications position="top-right" autoClose={5000} />
         <SessionProvider session={pageProps.session}>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID }>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID!}>
             <Layout>
               <div className="page">
                 <main>
