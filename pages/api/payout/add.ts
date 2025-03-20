@@ -833,6 +833,46 @@ const updateDetails = async () => {
 };
 
 const createAvatar = async () => {
+  const nftEntities = await prisma.nFTEntity.findMany({
+    include: {
+      athlete: {
+        include: {
+          athleteTribes: {
+            where: { active: true },
+            include: { tribe: true }
+          }
+        }
+      }
+    }
+  });
+
+  await Promise.all(
+    nftEntities.map(async (nft) => {
+      const athleteTribe = nft.athlete?.athleteTribes?.[0]; // Check if athleteTribes exists
+      const tribe = athleteTribe?.tribe; // Check if tribe exists
+
+      if (!tribe) {
+        console.warn(`Skipping NFT ${nft.id} because tribe is missing.`);
+        return;
+      }
+
+      await prisma.avatars.create({
+        data: {
+          nftEntityId: nft.id,
+          title: tribe.tribeName ?? "Unknown Tribe",
+          description: tribe.about ?? "No description available",
+          year: "2025",
+          thumbnail: tribe.tribeLogo ?? "",
+          tribeId: tribe.id ?? null
+        }
+      });
+    })
+  );
+};
+
+
+
+const createEnh = async () => {
   const avatars = await prisma.avatars.findMany({
     include : {
       nftEntity : {
@@ -869,8 +909,6 @@ const createAvatar = async () => {
     })
   );
 };
-
-
 
 const updateDetails0 = async () => {
   let users = await prisma.user.findMany();
@@ -1425,7 +1463,7 @@ export default async function handler(
 
   try {
     //
-    let response = await createAvatar();
+    let response = await createEnh();
     //
     /// ------------------ update userXp --------------
 
