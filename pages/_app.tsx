@@ -33,6 +33,11 @@ const App = ({ Component, pageProps }: AppProps) => {
     // }
   }, [authStore]);
 
+  console.log({
+    env : process.env.NEXT_PUBLIC_GOOGLE_Client_ID
+  });
+  
+
   return (
     <>
       <Head>
@@ -77,7 +82,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       >
         <Notifications position="top-right" autoClose={5000} />
         <SessionProvider session={pageProps.session}>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID}>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID || "573777399562-pre5j6pbs3bemlquugu9us5tlr9pkhdj.apps.googleusercontent.com"}>
             <Layout>
               <div className="page">
                 <main>
