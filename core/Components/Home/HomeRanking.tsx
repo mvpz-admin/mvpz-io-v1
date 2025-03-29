@@ -25,7 +25,7 @@ const ListTabel = ({ list, loading }) => {
         } transition-all duration-300 cursor-pointer p-3 `}
         key={10}
         onClick={() =>
-          router.push(`/p/${row.username}`)
+          !loading && router.push(`/p/${row.username}`)
         }
       >
         <div className="flex-[0.1] md:flex hidden justify-start items-center">

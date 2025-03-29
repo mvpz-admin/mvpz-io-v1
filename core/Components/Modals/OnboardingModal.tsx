@@ -59,8 +59,8 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
       {[...Array(totalSteps)].map((_, i) => (
         <div
           key={i}
-          className={` rounded-full transition-all duration-300 h-[10px] cursor-pointer ${
-            i <= step - 1 ? "w-[10px]" : "w-[80px]"
+          className={` rounded-full transition-all duration-300 md:h-[10px] h-[8px] cursor-pointer ${
+            i <= step - 1 ? "w-[10px]" : "md:w-[80px] w-[50px]"
           } ${i <= step ? "bg-white" : "bg-[#2C2D30]"}`}
           onClick={() => step !== 1 && i <= step - 1 && setStep(i)}
         />
@@ -74,7 +74,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
     showForegroundLayer?: boolean;
   }) => {
     return (
-      <div className="relative w-full h-screen">
+      <div className="relative w-full h-screen ">
         {/* Background Glow Effects */}
         <div className="absolute inset-0 overflow-hidden brightness-50">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[120px]" />
@@ -86,7 +86,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
         {!showForegroundLayer && (
           <>
             <FloatingCard
-              className="w-32 h-32 top-[5%] left-[40%] filter blur-[40px] opacity-15"
+              className=" w-32 h-32 top-[5%] left-[40%] filter blur-[40px] opacity-15"
               imageUrl="https://res.cloudinary.com/dg0ahswkh/image/upload/v1743017259/dollar-dollar-gradient_hwwsge.png"
               animate={false}
             />
@@ -113,7 +113,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
         {/* Floating Cards - Foreground Layer (Sharp) */}
         <>
           <FloatingCard
-            className={`w-24 h-24 top-[10%] right-[30%] filter ${
+            className={`md:block hidden w-24 h-24 top-[10%] right-[30%] filter ${
               showForegroundLayer
                 ? "blur-[0px] opacity-100"
                 : "blur-[50px] opacity-45"
@@ -122,7 +122,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             delay={1.5}
           />
           <FloatingCard
-            className={`w-28 h-28 bottom-[12%] left-[30%] filter ${
+            className={`md:block hidden w-28 h-28 bottom-[12%] left-[30%] filter ${
               showForegroundLayer
                 ? "blur-[0px] opacity-100"
                 : "blur-[50px] opacity-45"
@@ -131,7 +131,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             delay={2.5}
           />
           <FloatingCard
-            className={`w-20 h-20 top-[80%] right-[15%] filter ${
+            className={`md:block hidden w-20 h-20 top-[80%] right-[15%] filter ${
               showForegroundLayer
                 ? "blur-[0px] opacity-100"
                 : "blur-[50px] opacity-45"
@@ -140,7 +140,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             delay={1}
           />
           <FloatingCard
-            className={`w-20 h-20 top-[20%] left-[15%] filter ${
+            className={`md:block hidden w-20 h-20 top-[20%] left-[15%] filter ${
               showForegroundLayer
                 ? "blur-[0px] opacity-100"
                 : "blur-[50px] opacity-45"
@@ -157,7 +157,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
   };
 
   const WelcomeScreen = () => (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-screen px-5">
       {/* Content */}
       <div className="relative text-center z-10 w-full h-full flex flex-col items-center justify-center">
         <div className="flex items-center justify-center mb-4">
@@ -169,10 +169,10 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             className="relative z-10"
           />
         </div>
-        <h2 className="text-3xl font-bold text-white mb-4">
+        <h2 className="md:text-3xl text-xl font-bold text-white mb-4">
           Welcome to MVPz Sports
         </h2>
-        <p className="text-base text-gray-400 mb-12 max-w-xl mx-auto">
+        <p className="md:text-base  text-sm text-gray-400 md:mb-12 mb-6 max-w-xl mx-auto">
           Your new home for NFTs and tokens. Join the community and start
           collecting today.
         </p>
@@ -209,8 +209,8 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
           />
         </svg>
       </div>
-      <h2 className="text-4xl font-bold text-white mb-4">Find Your Tribe</h2>
-      <p className="text-sm text-gray-300 mb-2 md:max-w-[60%] mx-auto">
+      <h2 className="md:text-4xl text-xl font-bold text-white mb-4">Find Your Tribe</h2>
+      <p className="md:text-sm text-[10px] text-gray-300 mb-2 md:max-w-[60%] mx-auto">
         A unique social platform that brings you closer to your favorite
         athletes. Connect with other fans who share your passion for sports.
         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eaque,
@@ -239,10 +239,10 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
         </svg>
       </div>
 
-      <h2 className="text-4xl font-bold text-white mb-4">
+      <h2 className="md:text-4xl text-xl font-bold text-white mb-4">
         Collect Sports Cards
       </h2>
-      <p className="text-sm text-gray-300 mb-2 md:max-w-[60%] mx-auto">
+      <p className="md:text-sm text-[10px] text-gray-300 mb-2 md:max-w-[60%] mx-auto">
         Collect digital sports cards of your favorite athletes. Each card is
         essential to your tribe and gives you access to exclusive content. Lorem
         ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem
@@ -268,10 +268,10 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
           />
         </svg>
       </div>
-      <h2 className="text-4xl font-bold text-white mb-4">
+      <h2 className="md:text-4xl text-xl font-bold text-white mb-4">
         Support Your Heroes
       </h2>
-      <p className="text-sm text-gray-300 mb-2 md:max-w-[60%] mx-auto">
+      <p className="md:text-sm text-[10px] text-gray-300 mb-2 md:max-w-[60%] mx-auto">
         Directly support athletes through tips and engagement. Get recognized by
         your favorite sports stars and build a connection. Lorem ipsum dolor sit
         amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit
@@ -282,10 +282,10 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
 
   const Step4 = () => (
     <div className="text-center py-[60px] md:max-w-[60%] mx-auto">
-      <h2 className="text-4xl font-bold text-white mb-20 ">
+      <h2 className="md:text-4xl text-xl font-bold text-white md:mb-20 mb-10 ">
         Introducing Rewards
       </h2>
-      <div className="grid grid-cols-2 gap-8 text-left">
+      <div className="grid md:grid-cols-2 grid-cols-1 md:gap-8 gap-4 text-left">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 flex-shrink-0">
             <svg
@@ -303,8 +303,8 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             </svg>
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-1">STAY ACTIVE</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="md:text-base text-[12px] text-white font-semibold mb-1">STAY ACTIVE</h3>
+            <p className="text-gray-400 md:text-sm text-[10px]">
               EARN XP FOR ENGAGING IN CORE ACTIONS ON THE PLATFORM.
             </p>
           </div>
@@ -326,8 +326,8 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             </svg>
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-1">STAY LOYAL</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="md:text-base text-[12px] text-white font-semibold mb-1">STAY LOYAL</h3>
+            <p className="text-gray-400 md:text-sm text-[10px]">
               MAKE MVPz YOUR PLATFORM OF CHOICE TO MAXIMIZE YOUR REWARDS.
             </p>
           </div>
@@ -349,8 +349,8 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             </svg>
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-1">STAY OG</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="md:text-base text-[12px] text-white font-semibold mb-1">STAY OG</h3>
+            <p className="text-gray-400 md:text-sm text-[10px]">
               YOUR MVP HISTORY MATTERS. RETRO DETAILS COMING SOON.
             </p>
           </div>
@@ -372,10 +372,10 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             </svg>
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-1">
+            <h3 className="md:text-base text-[12px] text-white font-semibold mb-1">
               STAY TUNED FOR SURPRISES
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 md:text-sm text-[10px]">
               ENGAGE WITH MVP FOR A CHANCE TO EARN SHIPMENTS OF XP.
             </p>
           </div>
@@ -385,7 +385,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
   );
 
   const LoadingScreen = () => (
-    <div className="text-center">
+    <div className="text-center w-full px-5">
       <div className="relative w-[500px] mx-auto mb-12">
         {/* Glowing effect under the bar */}
         <div className="absolute inset-0 bg-primary/20 filter blur-xl -z-10" />
@@ -434,7 +434,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
     if (step === totalSteps) {
       setShowLoading(true);
       setTimeout(() => {
-        onClose();
+        // onClose();
       }, 10000);
     } else {
       setStep(step + 1);
@@ -456,13 +456,13 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
     >
       {/* header */}
       <div className="absolute top-0 left-0 flex justify-between items-center w-full h-[60px] px-5 z-50">
-        <div className="flex items-center">
+        <div className=" md:block hidden">
           <Image
             src="/images/logos/logo-transparent.png"
             alt="MVPz Sports Logo"
             width={80}
             height={20}
-            className="relative z-10"
+            className="relative z-10 "
           />
         </div>
         {showSteps && !showLoading && step < 4 && (
@@ -484,7 +484,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
           {!showSteps && !showLoading && <WelcomeScreen />}
 
           {showSteps && !showLoading && (
-            <div className="relative z-10 w-full  h-screen flex flex-col items-center justify-center">
+            <div className="relative z-10 w-full  h-screen flex flex-col items-center justify-center px-5">
               {step === 1 && <Step1 />}
               {step === 2 && <Step2 />}
               {step === 3 && <Step3 />}
@@ -494,14 +494,14 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
                 {step > 1 && (
                   <button
                     onClick={() => setStep(step - 1)}
-                    className="px-6 py-2 bg-[#1A1B1E] text-white rounded-lg hover:bg-[#2C2D30] transition-all duration-300"
+                    className="md:px-6 px-5 md:py-2 py-2 bg-[#1A1B1E] text-white rounded-lg hover:bg-[#2C2D30] transition-all duration-300"
                   >
                     Back
                   </button>
                 )}
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-all duration-300"
+                  className="md:px-6 px-5 md:py-2 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-all duration-300"
                 >
                   {step === totalSteps ? "Game On" : "Next"}
                 </button>
@@ -509,7 +509,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
             </div>
           )}
           <div className="relative z-10 w-full  h-screen flex flex-col items-center justify-center">
-            <div className="relative md:max-w-[60%] mx-auto">
+            <div className="relative w-full px-5">
               {showLoading && <LoadingScreen />}
             </div>
           </div>

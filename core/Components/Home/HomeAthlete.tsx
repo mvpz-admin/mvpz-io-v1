@@ -21,7 +21,7 @@ const HomeAthlete = ({ athletes, loading }) => {
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
         onClick={() =>
-          router.push(`/a/${ath.username}`)
+          !loading && router.push(`/a/${ath.username}`)
         }
       >
         {/* images */}

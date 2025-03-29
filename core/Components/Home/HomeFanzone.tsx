@@ -50,7 +50,7 @@ const TeamStripe = ({ team, loading }) => {
       className={`relative p-2 bg-white bg-opacity-5 ${
         !loading ? "hover:bg-opacity-10" : "hover:bg-opacity-5"
       } transition-all duration-300 cursor-pointer  rounded-lg flex justify-between items-center gap-2`}
-      onClick={() => router.push(`/t/${team?.tribeId}`)}
+      onClick={() => !loading && router.push(`/t/${team?.tribeId}`)}
     >
       <div className="flex justify-start items-center gap-2">
         <div
@@ -185,7 +185,7 @@ const Shouts = ({ shouts, loading }) => {
                       <div
                         className="flex justify-start items-center gap-2"
                         onClick={() =>
-                          router.push(`/a/${shout?.postedBy?.username}`)
+                          !loading && router.push(`/a/${shout?.postedBy?.username}`)
                         }
                       >
                         <div
@@ -251,7 +251,7 @@ const Shouts = ({ shouts, loading }) => {
                         <article
                           className="font-inter text-3xl font-semibold"
                           onClick={() =>
-                            router.push(`/fanzone/p/shoutpost/${shout?.id}`)
+                            !loading && !loading && router.push(`/fanzone/p/shoutpost/${shout?.id}`)
                           }
                         >
                           {postTitle}
@@ -367,7 +367,7 @@ const HomeFanzone = ({ fanzone, loading }) => {
 
           <div
             className="px-3 py-2 border border-white border-opacity-10 bg-white bg-opacity-5 hover:bg-opacity-20 text-[10px] font-inter font-semibold cursor-pointer rounded-lg transition-all duration-300"
-            onClick={() => router.push(`/tribes`)}
+            onClick={() => !loading && router.push(`/tribes`)}
           >
             See More
           </div>

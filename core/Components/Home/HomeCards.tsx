@@ -18,7 +18,7 @@ const Card = ({ card, loading }) => {
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       onClick={() =>
-        router.push(`/a/${card?.nftEntity?.athlete?.username}/card/${card?.id}`)
+        !loading && !loading && router.push(`/a/${card?.nftEntity?.athlete?.username}/card/${card?.id}`)
       }
     >
       {/* images */}
@@ -39,7 +39,7 @@ const Card = ({ card, loading }) => {
       <div className="absolute top-0 left-0 w-full h-full  bg-gradient-to-t from-[rgba(0,0,0,0.8)] to-transparent p-2 flex flex-col justify-end items-start">
         {/* content */}
         <div className="relative w-full" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-start items-center gap-2 cursor-pointer" onClick={() => router.push(`/a/${card?.nftEntity?.athlete?.username}`)}>
+        <div className="flex justify-start items-center gap-2 cursor-pointer" onClick={() => !loading && router.push(`/a/${card?.nftEntity?.athlete?.username}`)}>
           <div
             className={`relative w-[55px] h-[55px] ${
               loading ? "border-0" : "border-2"
