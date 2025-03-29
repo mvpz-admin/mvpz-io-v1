@@ -5,9 +5,10 @@ interface TooltipProps {
   text: string;
   children: ReactNode;
   position?: "top" | "bottom" | "left" | "right" | "topRight" | "topLeft" | "bottomRight" | "bottomLeft";  // Updated position prop
+  showTooltip?: boolean;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ text, children, position = "top" }) => {
+const Tooltip: React.FC<TooltipProps> = ({ text, children, position = "top" ,  showTooltip : viewTooltip = true}) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const showTooltip = () => setIsVisible(true);
@@ -62,16 +63,16 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children, position = "top" }) =
   };
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block w-full">
       <div
-        className="flex items-center"
+        className="flex items-center w-full"
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
       >
         {children}
       </div>
 
-      {isVisible && (
+      {viewTooltip && isVisible && (
         <div className={`absolute ${getTooltipPosition()} w-max px-3 py-2 text-sm bg-gray-800 text-white rounded-md shadow-lg z-10 max-w-[300px]`}>
           {text}
           <div className={getArrowPosition()} />

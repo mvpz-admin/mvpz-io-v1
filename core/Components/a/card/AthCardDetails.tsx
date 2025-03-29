@@ -15,7 +15,11 @@ import { IoClose, IoEllipsisVertical, IoIdCard } from "react-icons/io5";
 import { FaXTwitter } from "react-icons/fa6";
 import { PiMedalMilitaryFill } from "react-icons/pi";
 import { GiCardPlay } from "react-icons/gi";
-import { MdCardMembership, MdContentCopy, MdOutlineDateRange } from "react-icons/md";
+import {
+  MdCardMembership,
+  MdContentCopy,
+  MdOutlineDateRange,
+} from "react-icons/md";
 import { SiVorondesign } from "react-icons/si";
 import { RiUser5Fill } from "react-icons/ri";
 import { callAPI } from "../../../../lib/utils";
@@ -24,6 +28,7 @@ import Skeleton from "../../../../core/Atoms/Others/Skeleton";
 import { useIsDesktop } from "../../../../hooks/useIsDesktop";
 import { useCardDetailsStore } from "../../../../store/useAthCollectionStore";
 import { useBuyStore, useCartStore } from "../../../../store/useGlobalStore";
+import { Modal, Radio, Button } from "@mantine/core";
 
 const AthCardDetails = ({ propCardId = null, model = false }) => {
   const swiperRef = useRef(null);
@@ -31,12 +36,20 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
   const [cardDetailsDataLoading, setCardDetailsDataLoading] = useState(true);
   const [showMore, setShowMore] = useState(false);
   const [showCopyEffect, setShowCopyEffect] = useState(false);
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [selectedCard, setSelectedCard] = useState("");
+  const [actionType, setActionType] = useState<"buy" | "cart">("buy");
+  const [viewType, setViewType] = useState<"2D" | "3D">("2D");
+  const [eventType, setEventType] = useState<"buy" | "cart">(null);
   const router = useRouter();
   const cardId = propCardId || router.query.cardId;
   const username = router.query.username;
-  const { checkIdInCard, addToCart, removeFromCart } = useCartStore(
-    (state) => state
-  );
+  const {
+    addToCartCard,
+    removeFromCartCard,
+    checkCardBaseCard,
+    checkCardEnhancement,
+  } = useCartStore((state) => state);
   const { addToBuy } = useBuyStore((state) => state);
 
   const handleFetchCardDetailsData = async ({ cardId }) => {
@@ -74,6 +87,152 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
     navigator.clipboard.writeText(currentUrl);
     setShowCopyEffect(true);
     setTimeout(() => setShowCopyEffect(false), 2000);
+  };
+
+  const handleAddToCart = () => {
+    if (!cardDetailsData?.card?.hasBaseCard?.hasCard) {
+      addToCartCard({
+        id: cardDetailsData?.card?.id,
+        productType: "card" as const,
+        card: {
+          avatarId: cardDetailsData?.card?.avatarBaseCard?.id,
+          availableBaseCard: cardDetailsData?.card?.hasBaseCard?.purchaseCards || [],
+          baseCard: cardDetailsData?.card?.avatarBaseCard || {},
+          cardProductEnhancementCard: [
+            {
+              id: cardDetailsData?.card?.id,
+              title: cardDetailsData?.card?.title,
+              price: cardDetailsData?.card?.price,
+              image: cardDetailsData?.card?.nftImage,
+              cardType: cardDetailsData?.card?.cardType,
+            },
+          ],
+        },
+      });
+    } else {
+      setShowCardModal(true);
+      setEventType("cart");
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!cardDetailsData?.card?.hasBaseCard?.hasCard) {
+      addToBuy({
+        id: cardDetailsData?.card?.id,
+        productType: "card" as const,
+        card: {
+          avatarId: cardDetailsData?.card?.avatarBaseCard?.id,
+          availableBaseCard: cardDetailsData?.card?.hasBaseCard?.purchaseCards || [],
+          baseCard: cardDetailsData?.card?.hasBaseCard?.purchaseCards?.[0] || {},
+          cardProductEnhancementCard: [
+            {
+              id: cardDetailsData?.card?.id,
+              title: cardDetailsData?.card?.title,
+              price: cardDetailsData?.card?.price,
+              image: cardDetailsData?.card?.nftImage,
+              cardType: cardDetailsData?.card?.cardType,
+            },
+          ],
+        },
+      });
+    } else {
+      setShowCardModal(true);
+      setEventType("buy");
+    }
+  };
+
+  const handleModalConfirm = () => {
+    let baseDetails = cardDetailsData?.card?.hasBaseCard?.purchaseCards
+      ?.filter((c) => c.cardSerialNumber === selectedCard)
+      ?.map((c) => {
+        let { nftMajorEnhancement, ...rest } = c;
+        return {
+          ...rest,
+          ...nftMajorEnhancement,
+        };
+      })[0];
+
+    if (eventType === "buy") {
+      // Handle buy case
+      addToBuy({
+        id: cardDetailsData?.card?.id,
+        productType: "card" as const,
+        card: {
+          avatarId: cardDetailsData?.card?.avatarBaseCard?.id,
+          availableBaseCard: cardDetailsData?.card?.hasBaseCard?.purchaseCards || [],
+          baseCard:
+            selectedCard === "new"
+              ? {
+                  id: cardDetailsData?.card?.avatarBaseCard?.id,
+                  title: cardDetailsData?.card?.avatarBaseCard?.title,
+                  price: cardDetailsData?.card?.baseCardPrice || 0,
+                  image: cardDetailsData?.card?.avatarBaseCard?.thumnail,
+                }
+              : {
+                  id: cardDetailsData?.card?.avatarBaseCard?.id,
+                  title: cardDetailsData?.card?.avatarBaseCard?.title,
+                  price: 0,
+                  image: baseDetails?.thumbnail,
+                  serialNumber: baseDetails?.cardSerialNumber,
+                },
+          cardProductEnhancementCard:
+            cardDetailsData?.card?.cardType === "Base Card"
+              ? []
+              : [
+                  {
+                    id: cardDetailsData?.card?.id,
+                    title: cardDetailsData?.card?.title,
+                    price:
+                      selectedCard === "new"
+                        ? Number(cardDetailsData?.card?.price) +
+                          Number(cardDetailsData?.card?.baseCardPrice)
+                        : Number(cardDetailsData?.card?.price),
+                    image: cardDetailsData?.card?.nftImage,
+                    cardType: cardDetailsData?.card?.cardType,
+                  },
+                ],
+        },
+      });
+    } else {
+      addToCartCard({
+        id: cardDetailsData?.card?.id,
+        productType: "card" as const,
+        card: {
+          avatarId: cardDetailsData?.card?.avatarBaseCard?.id,
+          availableBaseCard: cardDetailsData?.card?.hasBaseCard?.purchaseCards || [],
+          baseCard:
+            selectedCard === "new"
+              ? {
+                  id: cardDetailsData?.card?.avatarBaseCard?.id,
+                  title: cardDetailsData?.card?.avatarBaseCard?.title,
+                  price: cardDetailsData?.card?.baseCardPrice || 0,
+                  image: cardDetailsData?.card?.avatarBaseCard?.thumnail,
+                }
+              : {
+                  id: cardDetailsData?.card?.avatarBaseCard?.id,
+                  title: cardDetailsData?.card?.avatarBaseCard?.title,
+                  price: 0,
+                  image: baseDetails?.thumbnail,
+                  serialNumber: baseDetails?.cardSerialNumber,
+                },
+          cardProductEnhancementCard: [
+            {
+              id: cardDetailsData?.card?.id,
+              title: cardDetailsData?.card?.title,
+              price:
+                selectedCard === "new"
+                  ? Number(cardDetailsData?.card?.price) +
+                    Number(cardDetailsData?.card?.baseCardPrice)
+                  : Number(cardDetailsData?.card?.price),
+              image: cardDetailsData?.card?.nftImage,
+              cardType: cardDetailsData?.card?.cardType,
+            },
+          ],
+        },
+      });
+    }
+
+    setShowCardModal(false);
   };
 
   return (
@@ -197,13 +356,35 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                     height={500}
                     className={`absolute top-0 left-0 w-full h-full lg:object-contain object-cover rounded-lg`}
                   />
-                  {/* avatar */}
-                  <div className="absolute bottom-0 left-0 p-5  w-full lg:h-[200px] bg-gradient-to-b from-transparent to-black  flex flex-row  justify-end items-end  z-10 gap-2">
+
+                  <div className="absolute bottom-0 left-0 p-5  w-full lg:h-[200px] bg-gradient-to-b from-transparent to-black  flex flex-row  justify-between items-end  z-10 gap-2">
+                    <div className="flex justify-start items-center ">
+                      <article
+                        className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
+                        style={{
+                          opacity: viewType == "2D" ? "1" : "0.5",
+                        }}
+                        onClick={() => setViewType("2D")}
+                      >
+                        2D
+                      </article>
+                      <div className="w-[1px] h-[10px] bg-white bg-opacity-20 mx-1" />
+                      <article
+                        className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
+                        style={{
+                          opacity: viewType == "3D" ? "1" : "0.5",
+                        }}
+                        // onClick={() => setViewType("3D")}
+                      >
+                        3D
+                      </article>
+                    </div>
+                    {/* avatar */}
                     <div className="flex justify-start items-center gap-2">
                       <div className="flex flex-col justify-center items-end ">
                         <div className="flex  justify-start items-center">
                           <article className="text-sm font-monumentUltraBold font-semibold ">
-                            TEAM
+                            TRIBE
                           </article>
                         </div>
                         <div className="flex justify-start items-center space-x-1">
@@ -319,11 +500,12 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                       <IoIdCard className="lg:block hidden" />
                       <FaShare className="lg:block hidden" />
                       <div className="relative">
-                        <MdContentCopy 
-                          className={`cursor-pointer transition-all duration-300 ${showCopyEffect ? 'text-[#854df2]' : ''}`}
+                        <MdContentCopy
+                          className={`cursor-pointer transition-all duration-300 ${
+                            showCopyEffect ? "text-[#854df2]" : ""
+                          }`}
                           onClick={handleCopyUrl}
                         />
-                       
                       </div>
                     </>
                   )}
@@ -390,7 +572,7 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                     ${cardDetailsData?.card?.price}
                   </article>
                   <div className="font-inter text-[10px] px-2 py-1 bg-secondary border border-white border-opacity-10 rounded-lg">
-                    {cardDetailsData?.card?.cardLeft} Card Left
+                    {cardDetailsData?.card?.cardsAvailable?.available} Card Left
                   </div>
                 </div>
               )}
@@ -402,18 +584,10 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                   />
                 ) : !cardDetailsData?.card?.isSoldOut ? (
                   <div
-                    className="md:flex-1  flex-[0.5] h-full px-4 py-2 bg-gradient-to-r from-[#854df2] to-[#8c52ff] rounded-lg border border-white border-opacity-20 flex justify-center items-center gap-5"
+                    className="md:flex-1  flex-[0.5] h-full px-4 py-2 bg-gradient-to-r from-[#854df2] to-[#8c52ff] rounded-lg border border-white border-opacity-20 flex justify-center items-center gap-5 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToBuy({
-                        id: cardDetailsData?.card?.id,
-                        productType: "card",
-                        thumnail: cardDetailsData?.card?.nftImage,
-                        title: cardDetailsData?.card?.title,
-                        subtitle: `#${cardDetailsData?.card?.avatar?.title}`,
-                        price: cardDetailsData?.card?.price,
-                        isBaseReq: !cardDetailsData?.card?.hasBaseCard,
-                      });
+                      handleBuyNow();
                     }}
                   >
                     <article className="font-inter font-bold">Buy Now</article>
@@ -427,20 +601,17 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                   <Skeleton
                     className={`bg-secondary w-[250px] h-[40px] rounded-md mb-1 md:flex-[0.4] flex-[0.5]`}
                   />
-                ) : !checkIdInCard(cardDetailsData?.card?.id) ? (
+                ) : !(cardDetailsData?.card?.cardType === "Base Card"
+                    ? checkCardBaseCard(cardDetailsData?.card?.avatarBaseCard?.id)
+                    : checkCardEnhancement(
+                        cardDetailsData?.card?.avatarBaseCard?.id,
+                        cardDetailsData?.card?.id
+                      )) ? (
                   <div
                     className="md:flex-[0.4] flex-[0.5] h-full px-4 py-2 bg-secondary rounded-lg border border-white border-opacity-20 flex justify-center items-center gap-5 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToCart({
-                        id: cardDetailsData?.card?.id,
-                        productType: "card",
-                        thumnail: cardDetailsData?.card?.nftImage,
-                        title: cardDetailsData?.card?.title,
-                        subtitle: `#${cardDetailsData?.card?.avatar?.title}`,
-                        price: cardDetailsData?.card?.price,
-                        isBaseReq: !cardDetailsData?.card?.hasBaseCard,
-                      });
+                      handleAddToCart();
                     }}
                   >
                     <article className="font-inter font-bold">
@@ -453,7 +624,11 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                       className="font-inter font-bold"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeFromCart(cardDetailsData?.card?.id);
+                        removeFromCartCard(
+                          cardDetailsData?.card?.avatarBaseCard?.id,
+                          cardDetailsData?.card?.id,
+                          cardDetailsData?.card?.cardType
+                        );
                       }}
                     >
                       Remove From Cart
@@ -542,6 +717,59 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
           </div>
         </div>
       </div>
+
+      {/* Card Selection Modal */}
+      <Modal
+        opened={showCardModal}
+        onClose={() => setShowCardModal(false)}
+        title="Select Base Card"
+        centered
+        classNames={{
+          content:
+            "bg-black bg-opacity-90 backdrop-blur-xl rounded-xl font-inter",
+          header: "bg-transparent ",
+          title: "text-white text-xl font-bold",
+          close: "text-white hover:bg-white/10",
+          body: "text-white",
+        }}
+      >
+        <div className="flex flex-col gap-4 !font-inter ">
+          <Radio.Group
+            value={selectedCard}
+            onChange={setSelectedCard}
+            className="space-y-2 !font-inter"
+          >
+            {cardDetailsData?.card?.hasBaseCard?.purchaseCards?.map(
+              (purchaseCard) => (
+                <Radio
+                  key={purchaseCard.id}
+                  value={purchaseCard.cardSerialNumber}
+                  label={purchaseCard.cardSerialNumber}
+                  classNames={{
+                    label: "text-white font-inter text-[14px] font-medium",
+                    radio: "text-primary",
+                  }}
+                />
+              )
+            )}
+            <Radio
+              value="new"
+              label="Create New Base Card"
+              classNames={{
+                label: "text-white font-inter text-[14px] font-medium",
+                radio: "text-primary",
+              }}
+            />
+          </Radio.Group>
+          <Button
+            onClick={handleModalConfirm}
+            disabled={!selectedCard}
+            className="mt-4 bg-primary hover:bg-primary/90 "
+          >
+            Confirm
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

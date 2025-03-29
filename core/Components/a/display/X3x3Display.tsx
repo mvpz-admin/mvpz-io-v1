@@ -15,6 +15,7 @@ const X3x3Display = ({ cards, loading, openFilter, sectionActive }) => {
             ?.fill(0)
             ?.map((_, idx) => (
               <DisplayCard
+                height={openFilter ? "h-[275px]" : "h-[300px]"}
                 loading={loading}
                 type={"X3x3Display"}
                 card={_}
@@ -23,6 +24,7 @@ const X3x3Display = ({ cards, loading, openFilter, sectionActive }) => {
             ))
         : cards?.map((card, idx) => (
             <DisplayCard
+              height={openFilter ? "h-[275px]" : "h-[300px]"}
               loading={loading}
               type={"X3x3Display"}
               card={card}

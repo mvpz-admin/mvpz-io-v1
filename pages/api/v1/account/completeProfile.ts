@@ -19,7 +19,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { email, profileImage, username, firstName, lastName, dob, gender } =
       req.body;
 
-      let dateConverstion = new Date(dob)
+    let dateConverstion = new Date(dob);
 
     let checkUsernameAvailable = await prisma.user.findFirst({
       where: {
@@ -34,40 +34,79 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-   let response =  await prisma.user.update({
-      where: {
-        email,
-      },
+    let response = await prisma.user
+      .update({
+        where: {
+          email,
+        },
+        data: {
+          profileImage,
+          username,
+          name: `${firstName} ${lastName ? lastName : ""}`,
+          dob: dateConverstion,
+          sex: gender,
+          isProfileCompleted: true,
+          role: "User",
+        },
+        select: {
+          id: true,
+          role: true,
+          username: true,
+          name: true,
+          email: true,
+          isVerified: true,
+          profileImage: true,
+          bannerImage: true,
+          isProfileCompleted: true,
+        },
+      })
+      .then((res) => ({
+        ...res,
+        profileImage: getEventImage({ image: res.profileImage }),
+        bannerImage: getEventImage({ image: res.bannerImage }),
+      }));
+
+    await prisma.notification.create({
       data: {
-        profileImage,
-        username,
-        name: `${firstName} ${lastName ? lastName : ""}`,
-        dob : dateConverstion,
-        sex: gender,
-        isProfileCompleted : true,
-        role : "User"
-
+        userId: response.id,
+        title: "Profile Completed",
+        message: "Your profile has been completed successfully!",
       },
-      select: {
-        id: true,
-        role: true,
-        username: true,
-        name: true,
-        email: true,
-        isVerified: true,
-        profileImage: true,
-        bannerImage: true,
-        isProfileCompleted: true,
-      },
-    }).then((res) => ({
-      ...res,
-      profileImage :  getEventImage({image : res.profileImage}),
-      bannerImage : getEventImage({image : res.bannerImage})
-     }))
+    });
 
+    let xPType = await prisma.xPType.findFirst({
+      where: {
+        name: "Complete Profile",
+      },
+    });
+
+    let userXpCompleted = await prisma.userXPEarn.count({
+      where: {
+        xpTypeId: xPType.id,
+      },
+    });
+
+    if (userXpCompleted <= xPType.limit) {
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: "You have earned 5 XP",
+          message: "You have earned 5 XP for completing your profile",
+          url: "/rewards",
+        },
+      });
+
+      await prisma.userXPEarn.create({
+        data: {
+          userId: user.id,
+          xpTypeId: xPType.id,
+          xpEarn: xPType.xpValue,
+        },
+      });
+    }
     return res.status(200).json({
       success: true,
-      data : response,
+      data: response,
       message: `Profile Completed Successfully!`,
     });
   } catch (error) {

@@ -39,6 +39,7 @@ const nextConfig = pwaConfig({
       { protocol: "https", hostname: "**" },
       
     ],
+    domains: ['res.cloudinary.com'],
   },
 });
 

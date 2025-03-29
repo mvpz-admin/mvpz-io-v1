@@ -167,7 +167,7 @@ const Shouts = ({ shouts, loading }) => {
                 key={idx}
               >
                 <div className="absolute top-0 left-0 w-full h-full z-0 bg-secondary">
-                  {!loading && shout?.thumbnail && (
+                  {!loading && (
                     <Image
                       src={shout?.thumbnail}
                       alt="bg"

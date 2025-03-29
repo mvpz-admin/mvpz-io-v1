@@ -8,13 +8,15 @@ import { Analytics } from "@vercel/analytics/react";
 import "../styles/globals.css";
 import { Notifications } from "@mantine/notifications";
 import InstallPWA from "../core/Atoms/Others/InstallPWA";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useRouter } from "next/router";
 import { useGlobalStore } from "../store/useGlobalStore";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import OnboardingModal from "../core/Components/Modals/OnboardingModal";
 
 const App = ({ Component, pageProps }: AppProps) => {
+  const [showOnboarding, setShowOnboarding] = useState(false);
   let router = useRouter();
   const authStore = useAuthStore((state) => state.user);
   const handleFetchGlobalData = useGlobalStore(
@@ -26,13 +28,20 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [router.pathname]);
 
   useEffect(() => {
+    // Check if user has seen the onboarding
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!authStore?.token) return;
 
     // if (authStore?.token && !authStore?.isProfileCompleted) {
     //   router.push("/auth/account/new");
     // }
   }, [authStore]);
-
 
   return (
     <>
@@ -78,7 +87,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       >
         <Notifications position="top-right" autoClose={5000} />
         <SessionProvider session={pageProps.session}>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID!}>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_Client_ID}>
             <Layout>
               <div className="page">
                 <main>
@@ -91,6 +100,13 @@ const App = ({ Component, pageProps }: AppProps) => {
         </SessionProvider>{" "}
       </MantineProvider>
       <InstallPWA />
+      <OnboardingModal
+        opened={showOnboarding}
+        onClose={() => {
+          setShowOnboarding(false);
+          localStorage.setItem('hasSeenOnboarding', 'true');
+        }}
+      />
     </>
   );
 };

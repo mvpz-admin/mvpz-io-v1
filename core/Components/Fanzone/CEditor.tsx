@@ -19,7 +19,6 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import LineLoadingEffect from "../../Atoms/Loading/LineLoading";
 import { useFeedStore } from "../../../store/useOtherStore";
 import { useRouter } from "next/router";
-import { aw } from "framer-motion/dist/types.d-6pKw1mTI";
 import { callAPI } from "../../../lib/utils";
 import { getPostThumbnail } from "../../../utils/global/global";
 import { Loader } from "@mantine/core";

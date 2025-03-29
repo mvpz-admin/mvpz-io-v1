@@ -68,7 +68,7 @@ const AthAccountDetails = ({ profileDataLoading, profileData }) => {
       {/* container */}
       <div className="relative w-full md:h-[450px] h-[400px] z-0">
         {/* Bg Image */}
-        <div className="absolute top-0 left-0 w-full h-full bg-ternary z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-[#111] via-[#1f1f1f] to-[#2f2f2f] z-0">
           {!profileDataLoading && profileData?.bannerImage && (
             <Image
               src={profileData?.bannerImage}

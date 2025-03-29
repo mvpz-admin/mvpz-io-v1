@@ -22,7 +22,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     prisma.notification.create({
       data: {
-        type: "TIP",
         title: " Tip Not Sent!",
         message: `Your $${paymentInfo?.amount} tip got failed. Please try again.`,
         userId: paymentInfo?.fromUserId,

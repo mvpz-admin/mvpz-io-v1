@@ -37,11 +37,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         id: true,
         purchaseCards: {
           select: {
+            id: true,
             majorEnhancementPurchases: {
+              orderBy: {
+                nftMajorEnhancement: {
+                  ver: 'desc'
+                }
+              },
               select: {
+                id: true,
+                nftMajorEnhancementId: true,
                 nftMajorEnhancement: {
                   select: {
-                    cardNFTImage: true
+                    id: true,
+                    cardNFTImage: true,
+                    title: true,
+                    description: true,
+                    ver: true,
+                    avatar: {
+                      select: {
+                        id: true,
+                        title: true,
+                      }
+                    }
                   }
                 }
               }
@@ -49,7 +67,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }
         },
       },
-    });
+    }).then((res) => res?.purchaseCards?.map((card) => ({
+      id : card?.id,
+      title : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.title,
+      ver : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.ver,
+      avatar : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.avatar,
+      cardImage : getEventImage({ image: card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.cardNFTImage }),
+      count : card?.majorEnhancementPurchases?.length
+    })))
 
     if (!userWithCollections) {
       return res.status(404).json({
@@ -58,16 +83,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const collections = userWithCollections.purchaseCards?.flatMap(cards =>
-      cards.majorEnhancementPurchases.map(enh =>
-        getEventImage({ image: enh.nftMajorEnhancement.cardNFTImage })
-      )
-    ) || [];
+  
 
     return res.status(200).json({
       success: true,
       data: {
-        collections,
+        collections : userWithCollections,
       },
       message: "Cards Loaded Successfully",
     });

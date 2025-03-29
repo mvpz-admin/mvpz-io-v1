@@ -38,15 +38,15 @@ const Index = () => {
         </div>
         {/* bg-blur */}
         <div className="absolute top-0 left-0 w-full h-full z-5 backdrop-blur-3xl lg:px-10 md:px-5 px-2 pt-5 pb-24 md:pt-[125px] overflow-y-auto space-y-10 ">
-          <div className="w-full md:h-screen md:overflow-y-auto flex md:flex-row flex-col md:gap-10   ">
+          <div className="w-full  flex justify-center items-center   ">
             {/* left-side post details */}
             <>
               <PostDetails postId={postId} postType={postType} />
             </>
             {/* right-side other suggestions */}
-            <>
+            {/* <>
               <OtherSuggestions postId={postId} postType={postType} />
-            </>
+            </> */}
           </div>
         </div>
       </div>

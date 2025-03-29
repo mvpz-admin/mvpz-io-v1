@@ -113,7 +113,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await Promise.all([
         prisma.notification.create({
           data: {
-            type: "TIP",
             title: "New Tip Sent!",
             message: `You successfully sent a $${paymentInfo.amount} tip to ${paymentInfo.toUser.username}.`,
             userId: paymentInfo.fromUserId,
@@ -122,7 +121,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }),
         prisma.notification.create({
           data: {
-            type: "TIP",
             title: "New Tip Received!",
             message: `You received a $${userShare} tip from ${paymentInfo.fromUser.username}.`,
             userId: paymentInfo.toUserId,
@@ -149,7 +147,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             }),
             prisma.notification.create({
               data: {
-                type: "TIP",
                 title: `$${stripePayout.amount} has been claimed successfully!`,
                 message: `We have transferred $${stripePayout.amount} to your stripe account successfully!`,
                 userId: paymentInfo.toUserId,

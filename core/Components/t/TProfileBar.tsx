@@ -61,8 +61,8 @@ const TProfileBar = ({
       {/* container */}
       <div className="relative w-full h-[450px] z-0">
         {/* Bg Image */}
-        <div className="absolute top-0 left-0 w-full h-full bg-ternary z-0">
-          {!pageDataLoading && (
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-[#111] via-[#1f1f1f] to-[#2f2f2f] z-0">
+          {!pageDataLoading &&pageData?.tribe?.tribeHorizontalBanner && (
             <Image
               src={pageData?.tribe?.tribeHorizontalBanner}
               alt="bgimage"
@@ -86,7 +86,7 @@ const TProfileBar = ({
                 } rounded-lg p-[2p`}
               >
                 <div className="relative w-full h-full bg-ternary rounded-lg overflow-hidden">
-                  {!pageDataLoading && (
+                  {!pageDataLoading && pageData?.tribe?.tribeLogo && (
                     <Image
                       src={pageData?.tribe?.tribeLogo}
                       alt="bg"

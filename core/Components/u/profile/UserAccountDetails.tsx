@@ -123,7 +123,7 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
           {/* right section */}
           <div className="relative md:w-auto w-full flex md:justify-end justify-between md:items-center pb-8 ">
             {/* social media  */}
-            {user?.username !== profileData?.username && (
+            {user?.username !== profileData?.username ? (
                 <>
                   {profileDataLoading ? (
                     <Skeleton
@@ -144,7 +144,13 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
                     </div>
                   )}
                 </>
-              )}
+              ) : 
+              <div
+                      className="flex justify-center items-center  gap-2 px-3 py-2 border border-white border-opacity-20 rounded-lg backdrop-blur-md font-inter font-bold md:text-base text-sm cursor-pointer"
+                      
+                    >
+                      Edit Profile
+                    </div>}
             <div className="md:block hidden w-[1px] h-[25px] bg-white bg-opacity-40 mx-8" />
             {/* more optios */}
             <div className="flex justify-end items-center gap-5">

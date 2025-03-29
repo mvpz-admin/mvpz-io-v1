@@ -18,7 +18,7 @@ const getEventImage = ({ image }) => {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const user: any = await isLoginUser({ req });
-    const {cart} = req.body; // Array of cart items
+    const { cart } = req.body; // Array of cart items
 
     if (cart.length === 0) {
       return res.status(400).json({
@@ -33,148 +33,334 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Process each item in cart
     for (const item of cart) {
-      const { id, productType, title, price, thumnail, isBaseReq = false } = item;
-
-      switch (productType) {
-        case 'card':
-          let checkAvaCard = await prisma.nFTMajorEnhancement
-          .findFirst({
+      switch (item?.productType) {
+        case "card":
+          let card = item?.card;
+          let getBaseCard = await prisma.nFTMajorEnhancement.findFirst({
             where: {
-              id: item?.id,
+              id: card?.baseCard?.id,
             },
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              cardNFTImage: true,
-              price: true,
-              nftEntity: {
-                select: {
-                  id: true,
-                  price: true,
-                  puchaseCards: {
+            include: {
+              avatar: true,
+              enhancementPurchases: true,
+              type: true,
+              nftEntity: true,
+            },
+          });
+
+          // if first time minting
+          if (!card?.baseCard?.serialNumber) {
+            let checkPurchaseAvailable = await prisma.nFTPurchaseCard.findFirst(
+              {
+                where: {
+                  nftEntityId: getBaseCard?.nftEntity?.id,
+                  status: {
+                    equals: "UNASSIGNED",
+                  },
+                  isMinted: false,
+                },
+              }
+            );
+
+            if (!checkPurchaseAvailable) {
+              return res.status(500).json({
+                success: false,
+                error:
+                  "Enhancement card is sold out! You need a enhancement card to buy an enhancement card. Check the marketplace to see if anyone is selling one.",
+              });
+            }
+
+            let checkEnhancmentAvailable = await Promise.all(
+              card?.cardProductEnhancementCard?.map(async (data) => {
+                let checkEnhancment = await prisma.nFTMajorEnhancementPurchase
+                  .findFirst({
                     where: {
+                      nftMajorEnhancementId: data?.id,
                       status: {
                         equals: "UNASSIGNED",
                       },
+                      isMinted: false,
                     },
-                  },
+                    include: {
+                      nftMajorEnhancement: true,
+                    },
+                  })
+                  .then((res) => {
+                    return {
+                      purchaseId: res?.id,
+                      enhId: res?.nftMajorEnhancement?.id,
+                      enhprice: res?.nftMajorEnhancement?.price,
+                      enhTitle: res?.nftMajorEnhancement?.title,
+                    };
+                  });
+
+                if (!checkEnhancment) {
+                  return res.status(500).json({
+                    success: false,
+                    error:
+                      "Enhancement card is sold out! You need a enhancement card to buy an enhancement card. Check the marketplace to see if anyone is selling one.",
+                  });
+                }
+                return checkEnhancment;
+              })
+            );
+
+            if (!checkPurchaseAvailable) {
+              return res.status(500).json({
+                success: false,
+                error:
+                  "Base card is sold out! You need a base card to buy an enhancement card. Check the marketplace to see if anyone is selling one.",
+              });
+            }
+
+            let baseCardPrice = card?.baseCard?.serialNumber ? 0 : getBaseCard?.price || 0;
+            let allEnhancementPrice = checkEnhancmentAvailable?.reduce(
+              (acc, curr) => acc + (curr?.enhprice || 0),
+              0
+            ) || 0;
+
+            const totalAmount = Math.round((baseCardPrice + allEnhancementPrice) * 100);
+
+            lineItems.push({
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: getBaseCard?.title,
+                  description:
+                    card?.cardProductEnhancementCard?.length > 0
+                      ? `Digital Card - ${getBaseCard?.title}`
+                      : `Digital Card - ${getBaseCard?.title} & ${card?.cardProductEnhancementCard?.length} enhancement`,
+                  images: [
+                    card?.baseCard?.thumnail,
+                    ...(card?.cardProductEnhancementCard?.map(data => data?.image) || [])
+                  ].filter(Boolean),
                 },
+                unit_amount: totalAmount,
               },
-            },
-          })
-          .then((res) => {
-            let { nftEntity, ...otherData } = res;
-            return {
-              ...otherData,
-              nftEntity: {
-                ...nftEntity,
-                avaBaseCard: nftEntity.puchaseCards?.length,
+              quantity: 1,
+            });
+
+          
+            let cardItem = {
+              nftEntityId: getBaseCard?.nftEntity?.id,
+              baseCard: {
+                nftEntityId: getBaseCard?.nftEntity?.id,
+                assignOnSerialNumber: null,
+                purchaseCardId: checkPurchaseAvailable?.id,
+                cardSerialNumber: checkPurchaseAvailable?.cardSerialNumber,
               },
+              enhancementCards: checkEnhancmentAvailable,
             };
+
+            
+
+            paymentCartItems.push({
+              productId: getBaseCard?.id,
+              productType: "card",
+              entityId: getBaseCard?.nftEntity?.id,
+              cardItem,
+              quantity: 1 + checkEnhancmentAvailable?.length,
+            });
+
+            await prisma.nFTPurchaseCard.update({
+              where: { id: cardItem?.baseCard?.purchaseCardId },
+              data: {
+                isMinted: true,
+              },
+            });
+
+            await Promise.all(
+              cardItem?.enhancementCards?.map(async (data) => {
+                await prisma.nFTMajorEnhancementPurchase.update({
+                  where: { id: data?.purchaseId },
+                  data: {
+                    isMinted: true,
+                  },
+                });
+              })
+            )
+            
+
+          }else{
+            let checkPurchaseAvailable = await prisma.nFTPurchaseCard.findFirst(
+              {
+                where: {
+                  nftEntityId: getBaseCard?.nftEntity?.id,
+                  currentOwnerId : user?.id,
+                  cardSerialNumber : card?.baseCard?.serialNumber,
+                },
+              }
+            );
+
+            if (!checkPurchaseAvailable) {
+              return res.status(500).json({
+                success: false,
+                error:
+                  "Internal Server Error",
+              });
+            }
+
+ 
+            let checkEnhancmentAvailable = await Promise.all(
+              card?.cardProductEnhancementCard?.map(async (data) => {
+                let checkEnhancment = await prisma.nFTMajorEnhancementPurchase
+                  .findFirst({
+                    where: {
+                      nftMajorEnhancementId: data?.id,
+                      status: {
+                        equals: "UNASSIGNED",
+                      },
+                      isMinted: false,
+                    },
+                    include: {
+                      nftMajorEnhancement: true,
+                    },
+                  })
+                  .then((res) => {
+                    return {
+                      purchaseId: res?.id,
+                      enhId: res?.nftMajorEnhancement?.id,
+                      enhprice: res?.nftMajorEnhancement?.price,
+                      enhTitle: res?.nftMajorEnhancement?.title,
+                    };
+                  });
+
+                if (!checkEnhancment) {
+                  return res.status(500).json({
+                    success: false,
+                    error:
+                      "Enhancement card is sold out! You need a enhancement card to buy an enhancement card. Check the marketplace to see if anyone is selling one.",
+                  });
+                }
+                return checkEnhancment;
+              })
+            );
+
+            let baseCardPrice =  card?.baseCard?.serialNumber ? 0 :  getBaseCard?.price || 0;
+            let allEnhancementPrice = checkEnhancmentAvailable?.reduce(
+              (acc, curr) => acc + (curr?.enhprice || 0),
+              0
+            ) || 0;
+
+            const totalAmount = Math.round((baseCardPrice + allEnhancementPrice) * 100);
+
+            lineItems.push({
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: getBaseCard?.title,
+                  description:
+                  card?.baseCard?.serialNumber 
+                      ? `${card?.cardProductEnhancementCard?.length} enhancement`
+                      : `Digital Card - ${getBaseCard?.title} & ${card?.cardProductEnhancementCard?.length} enhancement`,
+                  images: [
+                    card?.baseCard?.thumnail,
+                    ...(card?.cardProductEnhancementCard?.map(data => data?.image) || [])
+                  ].filter(Boolean),
+                },
+                unit_amount: totalAmount,
+              },
+              quantity: card?.baseCard?.serialNumber  ? checkEnhancmentAvailable?.length : 1 + checkEnhancmentAvailable?.length,
+            });
+
+
+
+            let cardItem = {
+              nftEntityId: getBaseCard?.nftEntity?.id,
+              baseCard: {
+                nftEntityId: getBaseCard?.nftEntity?.id,
+                assignOnSerialNumber: card?.baseCard?.serialNumber,
+                purchaseCardId: checkPurchaseAvailable?.id,
+                cardSerialNumber: null,
+              },
+              enhancementCards: checkEnhancmentAvailable,
+            };
+
+            
+
+            paymentCartItems.push({
+              productId: getBaseCard?.id,
+              productType: "card",
+              entityId: getBaseCard?.nftEntity?.id,
+              cardItem,
+              quantity: 1 + checkEnhancmentAvailable?.length,
+            });
+
+            await prisma.nFTPurchaseCard.update({
+              where: { id: cardItem?.baseCard?.purchaseCardId },
+              data: {
+                isMinted: true,
+              },
+            });
+
+            await Promise.all(
+              cardItem?.enhancementCards?.map(async (data) => {
+                await prisma.nFTMajorEnhancementPurchase.update({
+                  where: { id: data?.purchaseId },
+                  data: {
+                    isMinted: true,
+                  },
+                });
+              })
+            )
+
+          }
+          break;
+
+        case "pack":
+          break;
+
+        case "apparel":
+          let apparel = item?.apparel;
+
+          let findApparel = await prisma.apparel.findFirst({
+            where: {
+              id: apparel?.id,
+            },
           });
 
-          if (checkAvaCard?.nftEntity?.avaBaseCard == 0) {
+          if(!findApparel){
             return res.status(500).json({
               success: false,
-              error:
-                "Base card is sold out! You need a base card to buy an enhancement card. Check the marketplace to see if anyone is selling one.",
+              error: "Apparel not found",
             });
           }
-      
-          const checkIfBaseCardIsAavailable = await prisma.nFTPurchaseCard.findFirst({
-            where: {
-              nftEntityId: checkAvaCard?.nftEntity?.id,
-              status: "UNASSIGNED",
-            },
-          });
-      
-      
-          const checkUserHasBaseCard = await prisma.nFTPurchaseCard.findFirst({
-            where : {
-              nftEntityId : checkAvaCard?.nftEntity?.id,
-              currentOwnerId : user?.id
-            }
-          })
-      
-          let baseCardPrice = !checkIfBaseCardIsAavailable
-            ? checkAvaCard?.nftEntity?.price
-            : 0;
-          const totalPrice = (checkAvaCard?.price || 20) + baseCardPrice;
+
+          // Convert price to cents for Stripe and ensure it's a number
+          const priceInCents = Math.round(parseFloat(apparel.price) * 100);
 
           lineItems.push({
             price_data: {
               currency: "usd",
               product_data: {
-                name: title,
-                description: `Digital Card - ${title}`,
-                images: [thumnail],
+                name: apparel?.title,
+                description: `Apparel - ${apparel?.title}, Size: ${apparel?.size}, Quantity: ${apparel?.qty}`,
+                images: [apparel?.thumbnail].filter(Boolean),
               },
-              unit_amount: Math.round(totalPrice * 100),
+              unit_amount: priceInCents,
             },
-            quantity: 1,
+            quantity: apparel.qty,
           });
+
+          let apparelItem = {
+            apparelId: apparel?.id,
+            quantity: apparel?.qty,
+            price: parseFloat(apparel?.price), // Convert string price to float
+            size: apparel?.size,
+          };
 
           paymentCartItems.push({
-            productId: id,
-            productType: "card",
-            entityId: checkAvaCard?.nftEntity?.id,
-            quantity: 1,
-            extraProductId: !!checkUserHasBaseCard ? checkUserHasBaseCard?.id : null,
-            price : totalPrice
-          });
-          break;
-
-        case 'pack':
-          // Add pack specific logic here
-          totalCartPrice += parseFloat(price);
-          lineItems.push({
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: title,
-                description: `Pack - ${title}`,
-                images: [thumnail],
-              },
-              unit_amount: Math.round(parseFloat(price) * 100),
-            },
-            quantity: 1,
-          });
-
-          paymentCartItems.push({
-            productId: id,
-            productType: "pack",
-            quantity: 1,
-          });
-          break;
-
-        case 'apparel':
-          // Add apparel specific logic here
-          totalCartPrice += parseFloat(price);
-          lineItems.push({
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: title,
-                description: `Apparel - ${title}`,
-                images: [thumnail],
-              },
-              unit_amount: Math.round(parseFloat(price) * 100),
-            },
-            quantity: 1,
-          });
-
-          paymentCartItems.push({
-            productId: id,
+            productId: apparel?.id,
             productType: "apparel",
-            quantity: 1,
+            apparelItem,
           });
+
           break;
 
         default:
           return res.status(400).json({
             success: false,
-            error: `Invalid product type: ${productType}`,
+            error: `Invalid product type: ${item?.productType}`,
           });
       }
     }
@@ -185,10 +371,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         user: { connect: { id: user?.id } },
         totalPrice: parseFloat(totalCartPrice.toFixed(2)),
         paymentStatus: "INITIATED",
-        cartItems: {
-          create: paymentCartItems,
+        productType: cart[0]?.productType || "card",
+        cardItems: {
+          create: paymentCartItems.filter(item => item.productType === "card").map(item => item.cardItem)
         },
-        quantity : 1
+        packItems: {
+          create: paymentCartItems.filter(item => item.productType === "pack").map(item => item.packItem)
+        },
+        apparelItems: {
+          create: paymentCartItems.filter(item => item.productType === "apparel").map(item => item.apparelItem)
+        },
+        quantity: 1,
       },
     });
 

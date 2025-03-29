@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -19,9 +20,16 @@ import axios from "axios";
 import {
   useCartStore,
   useLoginProcessStore,
+  useNotifications,
 } from "../../../store/useGlobalStore";
 import { GoSignOut } from "react-icons/go";
 import { SiTradingview } from "react-icons/si";
+import Tooltip from "../Others/Tooltip";
+import { io } from "socket.io-client";
+import { callAPI } from "../../../lib/utils";
+import { formatNumber } from "../../../utils/global/formating";
+
+const socket = io(process.env.NEXT_PUBLIC_APP_URL, { path: "/api/socket" });
 
 const LoginHeader = () => {
   const router = useRouter();
@@ -31,9 +39,53 @@ const LoginHeader = () => {
   const { logout } = useAuthStore.getState();
   const isLoggedIn = useAuthStore((state) => state.user);
   const { setOpenLoginModel } = useLoginProcessStore((state) => state);
-  const { totalProd, setOpenModel } = useCartStore((state) => state);
+  const { totalProd, setOpenModel : setOpenCartModel } = useCartStore((state) => state);
   const { user } = useAuthStore((state) => state);
   const [showOptions, setShowOptions] = useState(false);
+  const [showUtilitiesInfo, setShowUtilitiesInfo] = useState(false);
+  const [showXPInfo, setShowXPInfo] = useState(false);
+  const [activeXPTab, setActiveXPTab] = useState("Progress");
+  const xpRef = React.useRef<HTMLDivElement>(null);
+  const {addNotification, setNotifications, setOpenModel : setOpenNotificationsModel } =
+    useNotifications();
+  const [xp, setXp] = useState<any>(null);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
+
+  const [stages, setStages] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await callAPI({endpoint : "/v1/xp/xpLeaderboard"});
+      setStages(response.data);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Fetch stored notifications on page load
+    const fetchNotifications = async () => {
+     const response = await callAPI({
+      endpoint : "/v1/global/notifications",
+
+     })
+
+     if(response.success){
+      setNotifications(response.data.notifications);
+      setUnreadNotificationsCount(response.data.unreadNotificationsCount);
+      setXp(response.data.xp);
+     }
+    };
+    fetchNotifications();
+
+    // Listen for real-time notifications
+    socket.on("receiveNotification", (data) => {
+      addNotification(data);
+    });
+
+    return () => {
+      socket.off("receiveNotification");
+    };
+  }, []);
 
   const handleLogout = async () => {
     logout();
@@ -44,9 +96,13 @@ const LoginHeader = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isMac && e.metaKey && e.key === "/") {
-        setFocusSearch(true);
-        searchInputRef.current?.focus();
-        e.preventDefault(); // Prevent default browser behavior
+        if (isLoggedIn) {
+          setFocusSearch(true);
+          searchInputRef.current?.focus();
+          e.preventDefault(); // Prevent default browser behavior
+        } else {
+          setOpenLoginModel();
+        }
       }
     };
 
@@ -66,6 +122,18 @@ const LoginHeader = () => {
       document.body.style.overflowY = "auto"; // Cleanup to prevent issues
     };
   }, [focusSearch]);
+
+  // Add click outside handler for XP tooltip
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (xpRef.current && !xpRef.current.contains(event.target as Node)) {
+        setShowXPInfo(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   let mainLinks = [
     {
@@ -123,50 +191,111 @@ const LoginHeader = () => {
               className="relative lg:w-[100px] w-[80px] object-contain cursor-pointer lg:mt-0 mt-2"
             />
           </a>
-          <div className="md:block hidden w-[1px] h-[40px] bg-white bg-opacity-10 mx-5"></div>
+          {/* <div className="md:block hidden w-[1px] h-[40px] bg-white bg-opacity-10 mx-5"></div>
           <div className=" md:flex hidden justify-start items-center gap-8">
-            {["Blog", "FAQs", "Support"].map((item, idx) => (
+            {["What is Mvpz", "How it works", "Pricing"].map((item, idx) => (
               <span key={idx} className="text-[14px] font-inter font-semibold">
                 {item}
               </span>
             ))}
-          </div>
+          </div> */}
         </div>
         {/* search */}
-        <div
-          className={`lg:flex hidden justify-start items-center gap-2 h-[45px] w-[500px] bg-white ${
-            focusSearch
-              ? "bg-opacity-10 backdrop-blur-xl"
-              : "bg-opacity-5 backdrop-blur-xl"
-          } border border-white border-opacity-10 rounded-lg cursor-pointer pl-3 pr-2 py-2`}
-        >
-          <IoSearch size={20} />
-          <input
-            className="w-full h-full relative flex-1 bg-transparent outline-none"
-            placeholder="Search"
-            onFocus={() => {
-              setFocusSearch(true);
-            }}
-            readOnly
-          />
-          {isMac && (
+        {
+          <div
+            className={`lg:flex hidden justify-start items-center gap-2 h-[45px] w-[500px] bg-white ${
+              focusSearch
+                ? "bg-opacity-10 backdrop-blur-xl"
+                : "bg-opacity-5 backdrop-blur-xl"
+            } border border-white border-opacity-10 rounded-lg cursor-pointer pl-3 pr-2 py-2`}
+          >
+            <IoSearch size={20} />
+            <input
+              className="w-full h-full relative flex-1 bg-transparent outline-none"
+              placeholder="Search"
+              onFocus={() => {
+                isLoggedIn ? setFocusSearch(true) : setOpenLoginModel();
+              }}
+              readOnly
+            />
+            {/* {isMac && (
             <div className="flex justify-center items-center  w-[50px] h-[30px] bg-white bg-opacity-5 border border-white border-opacity-10 rounded-lg cursor-pointer px-2">
               <MdKeyboardCommandKey />
               <HiOutlinePlusSm />
               <article className="text-[12px]">/</article>
             </div>
-          )}
-        </div>
+          )} */}
+          </div>
+        }
+
         {isLoggedIn ? (
           <>
             {/* right section for desktop */}
             <div className="lg:flex hidden justify-end items-center gap-5">
-              <div className="flex justify-start items-center gap-2 cursor-pointer ml-2">
+              <div className="flex justify-start items-center gap-2">
+                <div
+                  ref={xpRef}
+                  className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
+                >
+                  <div
+                    className="flex justify-start items-center gap-2 cursor-pointer ml-2"
+                    onMouseEnter={() => setShowXPInfo(true)}
+                    onMouseLeave={() => setShowXPInfo(false)}
+                    onClick={() => router.push("/xp")}
+                  >
+                    <article className="font-mono font-bold">{formatNumber(xp?.xp)}</article>
+                    <Image
+                      src={`/images/other/xp.svg`}
+                      alt="xp"
+                      width={20}
+                      height={20}
+                      className="w-[30px] h-[30px] object-contain"
+                    />
+                  </div>
+
+                  {/* XP Tooltip */}
+                  {showXPInfo && (
+                   <div  onMouseEnter={() => setShowXPInfo(true)}
+                   onMouseLeave={() => setShowXPInfo(false)}>
+                     <XPBar
+                     stages={stages}
+                      activeXPTab={activeXPTab}
+                      setActiveXPTab={setActiveXPTab}
+                    />
+                   </div>
+                  )}
+                </div>
+                <div
+                  className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
+                  onMouseEnter={() => setShowUtilitiesInfo(true)}
+                  onMouseLeave={() => setShowUtilitiesInfo(false)}
+                >
+                  <div className="flex justify-start items-center gap-2 cursor-pointer ml-2">
+                    <Image
+                      src={`/images/other/utilities.gif`}
+                      alt="utilities"
+                      width={20}
+                      height={20}
+                      className="w-[30px] h-[30px] object-contain mb-2"
+                    />
+                    <article className="font-mono font-bold">0</article>
+                  </div>
+
+                  {showUtilitiesInfo && <UtilitiesBar />}
+                </div>
+              </div>
+              <div className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
+              onClick={setOpenNotificationsModel}>
                 <FaBell size={20} />
+                {unreadNotificationsCount > 0 && (
+                  <div className="absolute -top-2 -right-2 font-monumentUltraBold font-semibold text-[10px] w-5 h-5 bg-red-500 flex justify-center items-center rounded-full">
+                    <span>{unreadNotificationsCount}</span>
+                  </div>
+                )}
               </div>
               <div
                 className="relative flex justify-start items-center gap-2 p-3 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-lg cursor-pointer"
-                onClick={setOpenModel}
+                onClick={setOpenCartModel}
               >
                 <FaCartShopping size={20} />
 
@@ -199,8 +328,10 @@ const LoginHeader = () => {
             {/* right section for mobile */}
             <div className="lg:hidden flex justify-end items-center gap-5">
               <IoSearch size={20} onClick={() => setFocusSearch(true)} />
+              <div onClick={setOpenNotificationsModel}>
               <FaBell size={20} />
-              <div onClick={setOpenModel}>
+              </div>
+              <div onClick={setOpenCartModel}>
                 <FaCartShopping size={20} />
               </div>
               <div
@@ -226,7 +357,7 @@ const LoginHeader = () => {
           <div className="flex  justify-end items-center md:gap-5 gap-2 ">
             <div
               className="relative flex justify-start items-center gap-2 p-3 bg-white bg-opacity-5 md:border border-white border-opacity-10 rounded-lg cursor-pointer"
-              onClick={setOpenModel}
+              onClick={setOpenCartModel}
             >
               <FaCartShopping size={20} />
 
@@ -346,6 +477,133 @@ const LinksSections = ({ title = null, list = [] }) => {
           </div>
         );
       })}
+    </div>
+  );
+};
+
+const XPBar = ({ activeXPTab, setActiveXPTab, stages }) => {
+ 
+
+  const calculateTotalXp = (xpTypes) => {
+    return xpTypes.reduce((total, type) => {
+      return total + (type.earnings.length * type.xpValue);
+    }, 0);
+  };
+  return (
+    <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[300px] bg-black/90 backdrop-blur-xl border border-gray-700 rounded-lg shadow-xl z-50 font-inter">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-700 font-bold">
+        <button
+          className={`flex-1 py-3 text-sm  ${
+            activeXPTab === "Progress"
+              ? "text-white border-b-2 border-white"
+              : "text-gray-400"
+          }`}
+          onClick={() => setActiveXPTab("Progress")}
+        >
+          Progress
+        </button>
+        <button
+          className={`flex-1 py-3 text-sm  ${
+            activeXPTab === "Rewards"
+              ? "text-white border-b-2 border-white"
+              : "text-gray-400"
+          }`}
+          onClick={() => setActiveXPTab("Rewards")}
+        >
+          Rewards
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {activeXPTab === "Progress" ? (
+          <>
+          {stages?.map((stage) => (
+        <div key={stage.id} className='space-y-4 relative w-full '>
+          <h2 className='text-xl font-bold mb-3'>{stage.name}</h2>
+          
+          {/* Progress Items */}
+          <div className='space-y-2 text-xl'>
+            {stage?.xpTypes.map((xpType, index) => (
+              <div key={index} className='flex justify-between items-center'>
+                <span className='text-base'>{xpType.name}</span>
+                <div className='flex items-center'>
+                  {xpType.earnings.length > 0 && (
+                    <span className='text-green-400 mr-3 text-xs'>✓</span>
+                  )}
+                  <span className="text-sm">{xpType.xpValue} XP</span>
+                </div>
+              </div>
+            ))}
+
+            <div className='flex justify-between items-center pt-6 border-t border-gray-800'>
+              <span className='text-gray-400 text-base'>Total XP earned</span>
+              <span className="text-sm">{calculateTotalXp(stage.xpTypes)} XP</span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className='h-2 bg-gray-800 rounded-full mt-6'>
+            <div 
+              className='h-full bg-green-400 rounded-full'
+              style={{ width: `${(calculateTotalXp(stage.xpTypes) / (stage.xpTypes.reduce((total, type) => total + type.xpValue, 0))) * 100}%` }}
+            ></div>
+          </div>
+
+          {/* Complete Stage Button */}
+          <button className='w-full py-1 px-2 rounded-2xl bg-gray-900 mt-8 flex justify-between items-center text-sm'>
+            <span className='text-green-400'>Complete {stage.name}</span>
+            <span className='text-gray-400'>{stage.rewards[0]?.name}</span>
+          </button>
+        </div>
+      ))}
+          </>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex flex-col items-center justify-center py-8">
+              <span className="text-lg text-gray-400 font-bold">No rewards yet!</span>
+              <span className="text-sm text-gray-500 mt-2 text-center">Complete stages to unlock rewards</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const UtilitiesBar = () => {
+  return (
+    <div className="absolute top-[120%] left-1/2 -translate-x-1/2 w-[280px] bg-black/90 backdrop-blur-xl border border-gray-700 rounded-lg shadow-xl z-50">
+      <div className="p-4 font-inter">
+        <h3 className="text-base font-bold mb-1 text-white">Surge</h3>
+        <p className="text-[12px] text-gray-300 mb-4">Exclusive Utilities</p>
+
+        <div className="space-y-3 font-bold">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-300">
+              Limited Signed Jerseys:
+            </span>
+            <span className="text-[10px] font-bold text-white">$90.00</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-300">VIP Match Access:</span>
+            <span className="text-[10px] font-bold text-white">$50.00</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-300">
+              Exclusive Discounts:
+            </span>
+            <span className="text-[10px] font-bold text-white">$25.00</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-300">
+              Player-Led Skill Challenges:
+            </span>
+            <span className="text-[10px] font-bold text-white">$150</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

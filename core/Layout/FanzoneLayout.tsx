@@ -32,7 +32,7 @@ const LinksSections = ({ title = null, list = [] }) => {
   const handleNavigate = (item) => {
     if (isLoggedIn) {
       if (item?.url) {
-        router.push(item.url);
+        router.push(item?.url);
       } else {
         let func = item?.func;
         func();
@@ -54,7 +54,7 @@ const LinksSections = ({ title = null, list = [] }) => {
         return (
           <div
             className={`flex justify-start items-center p-2 gap-3 bg-white  ${
-              pathname === item.url ? "bg-opacity-10 " : "bg-opacity-0"
+              pathname === item?.url ? "bg-opacity-10 " : "bg-opacity-0"
             }   hover:bg-opacity-10 rounded-lg cursor-pointer transition-all duration-300`}
             onClick={() => handleNavigate(item)}
           >
@@ -183,10 +183,11 @@ export default function FanzoneLayout({ children }) {
     }
   }, [router.query]);
 
-  let mainLinks = [
+  let mainLinks =     isLoggedIn  ?[
+
     {
       label: "Fanzone",
-      icon: FaHandFist,
+      icon: RiTeamFill,
       url: "/fanzone",
     },
     {
@@ -195,14 +196,34 @@ export default function FanzoneLayout({ children }) {
       url: null,
       func: handleOpenModel,
     },
-    {
+   {
       label: "Shouts",
       icon: HiSpeakerphone,
       url: "/shouts",
     },
     {
       label: "Tribes",
+      icon: FaHandFist,
+      url: "/tribes",
+    },
+    
+  ] : [
+
+    {
+      label: "Fanzone",
       icon: RiTeamFill,
+      url: "/fanzone",
+    },
+    {
+      label: "Create",
+      icon: FaSquarePlus,
+      url: null,
+      func: handleOpenModel,
+    },
+   
+    {
+      label: "Tribes",
+      icon: FaHandFist,
       url: "/tribes",
     },
     

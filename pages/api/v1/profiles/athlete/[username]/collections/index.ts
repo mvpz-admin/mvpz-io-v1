@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { BB_BASE_URL } from "../../../../../../../utils/global/global";
+import {
+  BB_BASE_URL,
+  cardTyeColorCode,
+} from "../../../../../../../utils/global/global";
 import prisma from "../../../../../../../lib/prisma";
 import { isLoginUser } from "../../../../../../../lib/global/getUserFromToken";
 import { methodGuard } from "../../../../../../../utils/global/methodNotAllowed";
-
 
 const getEventImage = ({ image }) => {
   if (!image) return null;
@@ -14,8 +16,7 @@ const getEventImage = ({ image }) => {
   }
 };
 
-
-const Section1NftList = async ({ username, user}) => {
+const Section1NftList = async ({ username, user }) => {
   return prisma.user
     .findFirst({
       where: { username },
@@ -31,12 +32,19 @@ const Section1NftList = async ({ username, user}) => {
             price: true,
             majorEnhancements: {
               select: {
-                id :true,
+                id: true,
                 cardNFTImage: true,
                 title: true,
                 price: true,
+                type: {
+                  select: {
+                    type: true,
+                    subType: true,
+                  },
+                },
                 avatar: {
                   select: {
+                    id: true,
                     tribe: {
                       select: {
                         tribeShortName: true,
@@ -45,17 +53,30 @@ const Section1NftList = async ({ username, user}) => {
                     },
                   },
                 },
-                nftEntity : {
-                  select : {
-                    id : true,
-                    price : true,
-                    puchaseCards: {
+                nftEntity: {
+                  select: {
+                    id: true,
+                    price: true,
+                    _count: {
+                      select: {
+                        puchaseCards: {
+                          where: {
+                            status: "UNASSIGNED",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                _count: {
+                  select: {
+                    enhancementPurchases: {
                       where: {
-                        status: "UNASSIGNED"
-                      }
-                    }
-                  }
-                }
+                        status: "UNASSIGNED",
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -64,38 +85,178 @@ const Section1NftList = async ({ username, user}) => {
     })
     .then((res) => {
       if (!res || !res.entities.length) return { cards: [], totalResult: 0 };
-      
       return Promise.all(
         res.entities[0].majorEnhancements.map(async (data) => {
-          let { avatar,cardNFTImage,nftEntity, ...card } = data;
+          let { avatar, cardNFTImage, _count, nftEntity, type, ...card } = data;
+          let userHasBaseCard = null;
 
+          if (user?.id) {
+            let [findInNftPurchase] = await Promise.all([
+              prisma.nFTPurchaseCard
+                .findMany({
+                  where: {
+                    nftEntityId: nftEntity?.id,
+                    currentOwnerId: user?.id,
+                  },
+                  select: {
+                    id: true,
+                    cardSerialNumber: true,
+                    serialNumber: true,
+                  },
+                })
+                .then(async (res) => {
+                  // Wait for all promises to resolve
+                  const purchaseCardsPromises = res.map(async (data) => {
+                    const baseCard = await prisma.nFTMajorEnhancementPurchase
+                      .findFirst({
+                        where: {
+                          avatarId: avatar?.id,
+                          purchaseId: data?.id
+                        },
+                        select: {
+                          id: true,
+                          nftMajorEnhancement: {
+                            where: {
+                              isBaseCard: true,
+                            },
+                            select: {
+                              id: true,
+                              title: true,
+                              price: true,
+                              cardNFTImage: true,
+                            },
+                          },
+                        },
+                      })
+                      .then(async (resp) => {
+                        if (!resp) return null;
 
-          let userHasBaseCard = null
+                        const latestEnhancement = await prisma.nFTMajorEnhancementPurchase.findMany({
+                          where: {
+                            avatarId: avatar?.id,
+                            purchaseId: data?.id
+                          },
+                          select: {
+                            nftMajorEnhancement: {
+                              where: {
+                                type: {
+                                  subType: {
+                                    not: "TEAM_ADD",
+                                  },
+                                },
+                              },
+                              select: {
+                                cardNFTImage: true,
+                                title: true,
+                              },
+                            },
+                          },
+                          orderBy: {
+                           updatedAt : "desc"
+                          },
+                        });
+                        return {
+                          nftMajorEnhancement: {
+                            ...resp?.nftMajorEnhancement,
+                            title: resp?.nftMajorEnhancement?.title,
+                            thumbnail: getEventImage({
+                              image: latestEnhancement[0]?.nftMajorEnhancement?.cardNFTImage
+                                ? getEventImage({
+                                    image: latestEnhancement[0].nftMajorEnhancement.cardNFTImage,
+                                  })
+                                : resp?.nftMajorEnhancement?.cardNFTImage,
+                            }),
+                          },
+                        };
+                      });
 
-          if(user?.id){
-            let [findInMintPurchase,fintInNftPurchase] = await Promise.all([
-              prisma.nFTMintCard.findFirst({
-                where : {
-                  nftEntityId : nftEntity?.id,
-                  currentOwnerId : user?.id
-                }
-              }),
-              prisma.nFTPurchaseCard.findFirst({
-                where : {
-                  nftEntityId : nftEntity?.id,
-                  currentOwnerId : user?.id
-                }
-              })
-            ])
+                    return baseCard ? {
+                      ...data,
+                      ...baseCard,
+                    } : null;
+                  });
 
-            userHasBaseCard = findInMintPurchase?.id || fintInNftPurchase
+                  // Wait for all purchase cards to be processed
+                  const resolvedPurchaseCards = await Promise.all(purchaseCardsPromises);
+                  // Filter out null values
+                  return resolvedPurchaseCards.filter(card => card !== null);
+                }),
+            ]);
+
+            userHasBaseCard = {
+              hasCard: findInNftPurchase.length > 0,
+              purchaseCards: findInNftPurchase,
+            };
           }
 
-          let totalPrice = card?.price || res.entities[0]?.price
+          let totalPrice = card?.price || res.entities[0]?.price;
 
-          if(!userHasBaseCard){
-            totalPrice += nftEntity.price
+          let cardType: "BASE CARD" | "ENHANCEMENT CARD" =
+            type.subType === "TEAM_ADD" || type.subType === "TEAM_CHANGE" 
+              ? "BASE CARD" 
+              : "ENHANCEMENT CARD";
+          let cardsAvailable =
+            cardType == "BASE CARD"
+              ? {
+                  total: await prisma.nFTPurchaseCard.count({
+                    where: {
+                      nftEntityId: nftEntity.id,
+                    },
+                  }),
+                  available: await prisma.nFTPurchaseCard.count({
+                    where: {
+                      nftEntityId: nftEntity.id,
+                      status: "UNASSIGNED",
+                    },
+                  }),
+                }
+              : {
+                  total: await prisma.nFTMajorEnhancementPurchase.count({
+                    where: {
+                      nftMajorEnhancementId: card.id,
+                    },
+                  }),
+                  available: await prisma.nFTMajorEnhancementPurchase.count({
+                    where: {
+                      nftMajorEnhancementId: card.id,
+                      status: "UNASSIGNED",
+                    },
+                  }),
+                };
+
+        let avatarBaseCard = await prisma.avatars.findFirst({
+          where: {
+            id: avatar?.id
+          },
+          select: {
+            majorEnhancements: {
+              where: {
+                isBaseCard: true
+              },
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                cardNFTImage: true
+              }
+            }
           }
+        }).then(res => {
+          if (!res || !res.majorEnhancements || res.majorEnhancements.length === 0) {
+            return {
+              id: null,
+              title: "",
+              price: 0,
+              thumnail: null
+            };
+          }
+
+          const { cardNFTImage, ...data } = res.majorEnhancements[0];
+          return {
+            ...data,
+            thumnail: getEventImage({ image: cardNFTImage })
+          };
+        });
 
           return {
             ...card,
@@ -103,17 +264,27 @@ const Section1NftList = async ({ username, user}) => {
             price: Number(totalPrice).toFixed(2),
             tribe: {
               ...avatar.tribe,
-              tribeShortName : `#${avatar?.tribe?.tribeShortName}`,
+              tribeShortName: `#${avatar?.tribe?.tribeShortName}`,
               tribeLogo: getEventImage({ image: avatar.tribe.tribeLogo }),
             },
-            hasBaseCard : !!userHasBaseCard,
-            isSoldOut : !userHasBaseCard && nftEntity.puchaseCards?.length == 0 ? true : false
+            hasBaseCard: userHasBaseCard,
+            baseCardPrice: res.entities[0]?.price,
+            isSoldOut:
+              cardType == "BASE CARD"
+                ? nftEntity._count.puchaseCards == 0
+                : _count.enhancementPurchases == 0,
+            cardType: cardType === "BASE CARD" ? "Base Card" : "Enhancement",
+            colors:
+              cardType == "BASE CARD"
+                ? cardTyeColorCode.baseCard
+                : cardTyeColorCode.enhancemnetCard,
+            cardsAvailable,
+            avatarBaseCard
           };
         })
       ).then((cardList) => ({ cards: cardList, totalResult: cardList.length }));
     });
 };
-
 
 const Section2Teams = async ({ username }) => {
   let teamList = await prisma.user

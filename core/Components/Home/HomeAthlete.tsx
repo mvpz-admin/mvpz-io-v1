@@ -17,7 +17,7 @@ const HomeAthlete = ({ athletes, loading }) => {
 
     return (
       <div
-        className="relative w-[280px] h-full rounded-lg bg-secondary overflow-hidden transition-all duration-300 cursor-pointer"
+        className="relative w-[250px] h-full rounded-lg bg-secondary overflow-hidden transition-all duration-300 cursor-pointer"
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
         onClick={() =>
@@ -118,27 +118,27 @@ const HomeAthlete = ({ athletes, loading }) => {
         centeredSlides={false}
         breakpoints={{
           320: {
-            slidesPerView: 1.3, // Small Mobile
+            slidesPerView: 1.6, // Small Mobile
             spaceBetween: 1,
             centeredSlides : true
           },
           425: {
-            slidesPerView: 1.4, //Large Mobile
+            slidesPerView: 1.8, //Large Mobile
             spaceBetween: 1,
             centeredSlides : true
           },
           640: {
-            slidesPerView: 2.4, // Tablet
+            slidesPerView: 2.8, // Tablet
             spaceBetween: 20,
             centeredSlides : false
           },
           1024: {
-            slidesPerView: 3.3, // Small Laptop
+            slidesPerView: 3.6, // Small Laptop
             spaceBetween: 20,
             centeredSlides : false
           },
           1280: {
-            slidesPerView: 4.5, // Large Screens
+            slidesPerView: 5, // Large Screens
             spaceBetween: 20,
             centeredSlides : false
           },
@@ -150,14 +150,14 @@ const HomeAthlete = ({ athletes, loading }) => {
         loading ?
         Array(8)?.fill(0)?.map((ath, idx) => {
           return (
-            <SwiperSlide className="relative h-[375px]">
+            <SwiperSlide className="relative h-[300px]">
               <Card ath={ath} key={idx} loading={loading} />
             </SwiperSlide>
           );
         }):
         athletes?.map((ath, idx) => {
           return (
-            <SwiperSlide className="relative h-[375px]">
+            <SwiperSlide className="relative h-[300px]">
               <Card ath={ath} key={idx} loading={loading} />
             </SwiperSlide>
           );

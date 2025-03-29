@@ -44,7 +44,7 @@
   --font-family-graffiti : "SpriteGraffiti-Regular";
   --font-family-monumentRegular :  "MonumentExtended-Regular";
   --font-family-monumentUltraBold :  "MonumentExtended-Ultrabold";
-  --font-family-inter :  "Poppins";
+  --font-family-inter :  "Inter";
   --font-family-impact : "Impact";
   --font-family-nato :   "Noto Sans Hatran", sans-serif;;
 
@@ -57,6 +57,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: var(--font-family-inter);
 }
 
 body {

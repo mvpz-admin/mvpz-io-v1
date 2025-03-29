@@ -63,7 +63,7 @@ const ListTabel = ({ list, loading }) => {
                   />
                 )}
               </div>
-              {!loading && (
+              {/* {!loading && (
                 <div
                   className={`${
                     showCollections ? "grid" : "hidden"
@@ -97,7 +97,7 @@ const ListTabel = ({ list, loading }) => {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
             <div className="flex flex-1 flex-col justify-center items-start ">
               {loading ? (
@@ -228,7 +228,7 @@ const HomeRanking = ({ leaderboard, loading }) => {
         </div> */}
       </div>
       {/* Leaderboard */}
-      <div className="flex justify-start items-start gap-20">
+      <div className="flex justify-start items-center gap-20">
         {/* Left Container */}
         <div className="md:flex-[0.5] flex-1 w-full relative">
           <ListTabel list={leaderList?.slice(0, 5)} loading={loading} />

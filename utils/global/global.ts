@@ -12,11 +12,11 @@ export const enableBodyScroll = () => {
 export const HomePagesTab = [
     { label: "All",  gradient: 0, url: null },
     { label: "Fanzone", gradient: 3, url: "/fanzone" },
-    { label: "Apparel", gradient: 4, url: null },
-    { label: "Store", gradient: 5, url: null },
-    { label: "Market", gradient: 6, url: null },
-    { label: "Swap", gradient: 7, url: null },
-    { label: "Auctions", gradient: 8, url: null },
+    { label: "Apparel", gradient: 4, url: "/apparel" },
+    { label: "Store", gradient: 5, url: "/" },
+    { label: "Market", gradient: 6, url: "/market" },
+    { label: "Swap", gradient: 7, url: "/" },
+    { label: "Auctions", gradient: 8, url: "/" },
   ]
 
 export const HomePageLeaderboardTab = [
@@ -29,6 +29,19 @@ export const HomePageLeaderboardTab = [
     label: "Top",
   },
 ]
+
+export const cardTyeColorCode = {
+  baseCard : {
+    tagColor : "rgba(66, 153, 225, 0.5)",
+    textColor : "text-blue-300",
+    bgGradinet : "from-blue-500 to-indigo-400"
+  },
+  enhancemnetCard : {
+    tagColor : "rgba(159, 122, 234, 0.5)",
+    textColor : "text-purple-300",
+    bgGradinet : "from-purple-500 to-fuchsia-400"
+  }
+}
 
 
 export const HomePageGradients = [
@@ -142,8 +155,7 @@ export const HomePageGradients = [
       { label: "Athletes", id: "Athletes" },
       { label: "Media", id: "Media" },
       { label: "Live", id: "Live" },
-      { label: "Challenges", id: "Challenge" },
-      { label: "Utilies", id: "Utilies" },
+
     ];
 
 

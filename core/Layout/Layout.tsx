@@ -17,6 +17,7 @@ import PostTipModel from "../Components/Fanzone/PostTipModel";
 import CardCreator from "../Components/Cards/CardCreator";
 import ProfileWaitlisted from "../Components/Signin/ProfileWaitlisted";
 import { callAPI } from "../../lib/utils";
+import NotificationsModel from "../Components/Widgets/NotificationsModel";
 
 type Props = {
   children: ReactNode;
@@ -66,6 +67,7 @@ const Layout: React.FC<Props> = (props) => {
     "/policy",
     "/auth/account/new",
     "/[accountType]/[username]/card/[cardId]",
+    "/[accountType]/[username]/collected/[cardId]",
     "/payment/[prodType]/success",
   ];
 
@@ -127,6 +129,8 @@ const Layout: React.FC<Props> = (props) => {
       <CartModel />
       {/* Buy Model */}
       <BuyModel />
+      {/* Notifications Model */}
+      <NotificationsModel />
       {/* Fanzone Post Tip Model */}
       {openTipModel && <PostTipModel />}
       {/* Request A Card */}

@@ -4,7 +4,6 @@ import { isLoginUser } from "../../../../../../lib/global/getUserFromToken";
 import prisma from "../../../../../../lib/prisma";
 import { methodGuard } from "../../../../../../utils/global/methodNotAllowed";
 
-
 const getEventImage = ({ image }) => {
   if (!image) return null;
   if (image.includes("https://")) {
@@ -16,51 +15,73 @@ const getEventImage = ({ image }) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    let user : any = await isLoginUser({ req });
+    let user: any = await isLoginUser({ req });
     let tribeId = req.query.tribeId as string;
 
-    const tribe = await prisma.tribe.findFirst({
-      where: {
-        tribeId,
-      },
-      select: {
-        id : true,
-        tribeId : true,
-        tribeName : true,
-        tribeShortName : true,
-        about : true,
-        tribeLogo : true,
-        tribeHorizontalBanner : true,
-        members : {
-          where : {
-            userId : user?.id
-          }
+    const tribe = await prisma.tribe
+      .findFirst({
+        where: {
+          tribeId,
         },
-        _count : {
-          select : {
-            members : true
-          }
-        }
-      },
-    })?.then((res) => {
-      const {members, ...otherData} = res
-      return ({
-      ...otherData,
-      tribeHorizontalBanner : getEventImage({image : otherData?.tribeHorizontalBanner}),
-      tribeLogo : getEventImage({image : otherData?.tribeLogo}),
-      isMember : members?.length > 0
-    })})
+        select: {
+          id: true,
+          tribeId: true,
+          tribeName: true,
+          tribeShortName: true,
+          about: true,
+          tribeLogo: true,
+          tribeHorizontalBanner: true,
+          members: {
+            where: {
+              userId: user?.id,
+            },
+          },
+          athletes: {
+            select: {
+              athlete: {
+                select: {
+                  id: true,
+                  name: true,
+                  username: true,
+                  profileImage: true,
+                  verticalImage: true,
+                  isVerified: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+        },
+      })
+      ?.then((res) => {
+        const { members, athletes, ...otherData } = res;
+        return {
+          ...otherData,
+          tribeHorizontalBanner: getEventImage({
+            image: otherData?.tribeHorizontalBanner,
+          }),
+          tribeLogo: getEventImage({ image: otherData?.tribeLogo }),
+          isMember: members?.length > 0,
+          athletes: athletes?.map((data) => ({
+            ...data.athlete,
+            verticalImage: getEventImage({ image: data.athlete.verticalImage }),
+            profileImage: getEventImage({ image: data.athlete.profileImage }),
+          }) ),
+        };
+      });
 
-    if(!tribe){
+    if (!tribe) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    
-
 
     return res.status(200).json({
       success: true,
       data: {
-        tribe
+        tribe,
       },
       message: `Tribe Loaded SuccessFully`,
     });

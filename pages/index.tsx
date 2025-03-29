@@ -111,16 +111,16 @@ const Index = () => {
           </div>
            {/* Top Posts */}
            <div className="relative w-full md:px-10 px-2 mb-10">
-           <HomeFanzone fanzone={pageData?.fanzone} loading={pageDataLoading} />
+            <HomeFanzone fanzone={pageData?.fanzone} loading={pageDataLoading} />
           </div>
           {/* Athletes */}
-          <div className="relativew-full space-y-4 mb-10">
+           <div className="relativew-full space-y-4 mb-10">
             <HomeCards  cards={pageData?.enhCards} loading={pageDataLoading}/>
-          </div>
+          </div> 
           {/* Rankings */}
-          <div className="relative w-full md:px-10 px-2 mb-10">
+           <div className="relative w-full md:px-10 px-2 mb-10">
             <HomeRanking leaderboard={pageData?.leaderboard} loading={pageDataLoading}/>
-          </div>
+          </div> 
          
           {/* Athlete */}
           {/* <div className="relative w-full  space-y-4 mb-10">

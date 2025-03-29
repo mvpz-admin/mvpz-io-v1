@@ -7,7 +7,6 @@ import { Button, Loader } from "@mantine/core";
 import Tooltip from "../../Atoms/Others/Tooltip";
 import { callAPI, SportPositions } from "../../../lib/utils";
 import { useCompleteProfileStore } from "../../../store/useGlobalStore";
-import { IoMdInformationCircleOutline } from "react-icons/io";
 import { FaInfoCircle } from "react-icons/fa";
 import RadioFeild from "../../Atoms/Inputs/RadioFeild";
 import LineLoadingEffect from "../../Atoms/Loading/LineLoading";

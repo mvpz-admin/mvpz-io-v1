@@ -85,6 +85,49 @@ const PublicPost = async ({ res, user, html, thumbnail }) => {
         },
     }));
 
+    await prisma.notification.create({
+      data : {
+        userId : user?.id,
+        title : "Post Created!",
+        message : "Your post has been created successfully!",
+      }
+    })
+
+
+    let xPType = await prisma.xPType.findFirst({
+      where: {
+        name: "Create Post",
+      },
+    });
+
+    let userXpCompleted = await prisma.userXPEarn.count({
+      where: {
+        xpTypeId: xPType.id,
+      },
+    });
+
+    if (userXpCompleted <= xPType.limit) {
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: "You have earned 5 XP",
+          message: "You have earned 5 XP for creating a post",
+          url: "/rewards",
+        },
+      });
+
+      await prisma.userXPEarn.create({
+        data: {
+          userId: user.id,
+          xpTypeId: xPType.id,
+          xpEarn: xPType.xpValue,
+        },
+      });
+    }
+
+
+
+
   return res.status(201).json({
     success: true,
     data: post,

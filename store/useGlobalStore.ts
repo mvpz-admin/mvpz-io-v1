@@ -59,7 +59,7 @@ export const useCompleteProfileStore = create<completeProfile>()(
         });
       },
       profileImage:
-      "https://res.cloudinary.com/dv667zlni/image/upload/v1741680187/man_wp3pfp.png",
+        "https://res.cloudinary.com/dv667zlni/image/upload/v1741680187/man_wp3pfp.png",
       username: "",
       setUsername: (username) => {
         set({
@@ -239,26 +239,69 @@ export const useGlobalStore = create<GlobalState>()(
 
 // Global Cart & Buy Process //
 
+type cardProductBaseCard = {
+  id: string;
+  title: string;
+  price?: number;
+  image: string;
+  serialNumber?: string;
+};
+
+type cardProductEnhancementCard = {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  cardType: string;
+};
+
+type cardProduct = {
+  avatarId: string;
+  availableBaseCard: cardProductBaseCard[];
+  baseCard: cardProductBaseCard;
+  cardProductEnhancementCard: cardProductEnhancementCard[];
+};
+
+type apparelProduct = {
+  id: string;
+  qty: number;
+  size: string;
+  title: string;
+  thumbnail: string;
+  price: number;
+};
+
+type packProduct = {};
+
 type Cart = {
   id: string;
-  productType: "pack" | "apperal" | "card";
-  thumnail: string;
-  title: string;
-  subtitle: string;
-  price: number;
-  isBaseReq: boolean;
+  productType: "pack" | "apparel" | "card";
+  card?: cardProduct;
+  apparel?: apparelProduct;
+  pack?: packProduct;
 };
 
 type CartState = {
   cart: Cart[];
   totalProd: number;
   openModel: boolean;
-  addToCart: (card: Cart) => void;
-  removeFromCart: (cardId: string) => void;
+
+  addToCartCard: (card: any) => void;
+  addToCartApparel: (apparel: any) => void;
+  addToCartPack: (pack: any) => void;
+  removeFromCartCard: (
+    avatarId: string,
+    cardId: string,
+    cardType: string
+  ) => void;
+  removeFromCartApparel: (apparelId: string) => void;
+  removeFromCartPack: (packId: string) => void;
   clearCart: () => void;
   setOpenModel: () => void;
   setCloseModel: () => void;
   checkIdInCard: (id: string) => boolean;
+  checkCardEnhancement: (avatarId: string, cardId: string) => boolean;
+  checkCardBaseCard: (avatarId: string) => boolean;
 };
 
 export const useCartStore = create<CartState>()(
@@ -267,25 +310,174 @@ export const useCartStore = create<CartState>()(
       cart: [],
       totalProd: 0,
       openModel: false,
-      addToCart: (prod) => {
-        set((state) => {
-          let prodList = [...state.cart, prod];
-          return {
-            cart: prodList,
-            totalProd: prodList?.length,
+      addToCartCard: (prod) => {
+        let selectedCard = prod?.card?.cardProductEnhancementCard[0];
+        let existingCartItem = get().cart.find(
+          (item) =>
+            item.productType === "card" &&
+            item.card?.avatarId === prod.card.avatarId
+        );
+
+        if (selectedCard.cardType === "Base Card") {
+          if (!existingCartItem) {
+            // If no cart item exists for this avatar, create new
+            set((state) => ({
+              cart: [
+                ...state.cart,
+                {
+                  id: prod.id,
+                  productType: "card",
+                  card: {
+                    avatarId: prod.card.avatarId,
+                    availableBaseCard: prod.card.availableBaseCard || [],
+                    baseCard: prod.card.baseCard,
+                    cardProductEnhancementCard: [],
+                  },
+                },
+              ],
+            }));
+          } else {
+            // Update existing cart item's base card
+            set((state) => ({
+              cart: state.cart.map((item) =>
+                item.productType === "card" &&
+                item.card.avatarId === prod.card.avatarId
+                  ? {
+                      ...item,
+                      card: {
+                        ...item.card,
+                        baseCard: prod.card.baseCard,
+                      },
+                    }
+                  : item
+              ),
+            }));
+          }
+          // Open model after adding to cart
+          set((state) => ({
+            ...state,
             openModel: true,
-          };
-        });
+            totalProd: state.totalProd + 1,
+          }));
+        } else {
+          // Enhancement card case
+          if (!existingCartItem) {
+            // If no cart item exists, create new with base card and enhancement
+            set((state) => ({
+              cart: [
+                ...state.cart,
+                {
+                  id: prod.id,
+                  productType: "card",
+                  card: {
+                    avatarId: prod.card.avatarId,
+                    availableBaseCard: prod.card.availableBaseCard || [],
+                    baseCard: prod.card.baseCard || {},
+                    cardProductEnhancementCard: [selectedCard],
+                  },
+                },
+              ],
+            }));
+            set((state) => ({
+              ...state,
+              openModel: true,
+              totalProd: state.totalProd + 2,
+            }));
+          } else {
+            // Add enhancement to existing cart item
+            set((state) => ({
+              cart: state.cart.map((item) =>
+                item.productType === "card" &&
+                item.card.avatarId === prod.card.avatarId
+                  ? {
+                      ...item,
+                      card: {
+                        ...item.card,
+                        cardProductEnhancementCard: [
+                          ...item.card.cardProductEnhancementCard,
+                          selectedCard,
+                        ],
+                      },
+                    }
+                  : item
+              ),
+            }));
+            set((state) => ({
+              ...state,
+              openModel: true,
+              totalProd: state.totalProd + 1,
+            }));
+          }
+        }
       },
-      removeFromCart: (prodId) => {
-        set(() => {
-          let updateList = get().cart.filter((prod) => prod.id !== prodId);
-          return {
-            cart: updateList,
-            totalProd: updateList?.length,
+      addToCartApparel: (apparel) => {
+        set((state) => ({
+          cart: [...state.cart, apparel],
+          openModel: true,
+          totalProd: state.totalProd + 1,
+        }));
+      },
+      addToCartPack: (pack) => {
+        set((state) => ({
+          cart: [...state.cart, pack],
+          openModel: true,
+          totalProd: state.totalProd + 1,
+        }));
+      },
+      removeFromCartCard: (
+        avatarId: string,
+        cardId: string,
+        cardType: string
+      ) => {
+        if (cardType === "Base Card") {
+          // If it's a base card, remove the entire cart item
+          set((state) => {
+            return {
+              cart: state.cart.filter(
+                (item) => item.productType === "card" && item.id !== cardId
+              ),
+              openModel: false, // Close model after removing
+            };
+          });
+        } else {
+          // If it's an enhancement, only remove that enhancement from the array
+          set((state) => ({
+            cart: state.cart.map((item) => {
+              if (
+                item.productType === "card" &&
+                item.card.avatarId === avatarId
+              ) {
+                return {
+                  ...item,
+                  card: {
+                    ...item.card,
+                    cardProductEnhancementCard:
+                      item.card.cardProductEnhancementCard.filter(
+                        (card) => card.id !== cardId
+                      ),
+                  },
+                };
+              }
+              return item;
+            }),
             openModel: false,
-          };
-        });
+            totalProd: state.totalProd - 1, // Close model after removing
+          }));
+        }
+      },
+      removeFromCartApparel: (apparelId) => {
+        set((state) => ({
+          cart: state.cart.filter((prod) => prod.id !== apparelId),
+          openModel: false,
+          totalProd: state.totalProd - 1, // Close model after removing
+        }));
+      },
+      removeFromCartPack: (packId) => {
+        set((state) => ({
+          cart: state.cart.filter((prod) => prod.id !== packId),
+          openModel: false,
+          totalProd: state.totalProd - 1, // Close model after removing
+        }));
       },
       clearCart: () => {
         set(() => {
@@ -304,6 +496,22 @@ export const useCartStore = create<CartState>()(
       },
       checkIdInCard: (prodId) => {
         return get().cart.some((prod) => prod.id === prodId);
+      },
+      checkCardEnhancement: (avatarId: string, cardId: string) => {
+        return get().cart.some(
+          (prod) =>
+            prod.productType === "card" &&
+            prod.card.avatarId === avatarId &&
+            prod.card.cardProductEnhancementCard.some(
+              (card) => card.id === cardId
+            )
+        );
+      },
+      checkCardBaseCard: (avatarId: string) => {
+        return get().cart.some(
+          (prod) =>
+            prod.productType === "card" && prod.card.avatarId === avatarId
+        );
       },
     }),
     {
@@ -389,6 +597,58 @@ export const usePostTipStore = create<FanonzeTipState>()((set, get) => ({
       postId: null,
       postThumbnail: null,
       openTipModel: false,
+    }));
+  },
+}));
+
+// notification store //
+interface Notification {
+  id: string;
+  thumbnail: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  url: string;
+  notifyAt: string;
+}
+
+interface NotificationStore {
+  notifications: Notification[];
+  addNotification: (notification: Notification) => void;
+  setNotifications: (notifications: Notification[]) => void;
+  openModel: boolean;
+  setOpenModel: () => void;
+  setCloseModel: () => void;
+  setFilterNotifications: (id: string) => void;
+  setClearAllNotifications: () => void;
+}
+
+export const useNotifications = create<NotificationStore>((set) => ({
+  notifications: [],
+  addNotification: (notification) =>
+    set((state) => ({ notifications: [notification, ...state.notifications] })),
+  setNotifications: (notifications) => set({ notifications }),
+  openModel: false,
+  setOpenModel: () => {
+    set(() => ({
+      openModel: true,
+    }));
+  },
+  setCloseModel: () => {
+    set(() => ({
+      openModel: false,
+    }));
+  },
+  setFilterNotifications: (id: string) => {
+    set((state) => ({
+      notifications: state.notifications.filter(
+        (notification) => notification.id !== id
+      ),
+    }));
+  },
+  setClearAllNotifications: () => {
+    set(() => ({
+      notifications: [],
     }));
   },
 }));
