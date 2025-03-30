@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { isLoginUser } from "../../../../../../lib/global/getUserFromToken";
-import { methodGuard } from "../../../../../../utils/global/methodNotAllowed";
-import prisma from "../../../../../../lib/prisma";
+import { isLoginUser } from "../../../../../../../lib/global/getUserFromToken";
+import { methodGuard } from "../../../../../../../utils/global/methodNotAllowed";
+import prisma from "../../../../../../../lib/prisma";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

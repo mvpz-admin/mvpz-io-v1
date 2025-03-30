@@ -129,10 +129,10 @@ export default function CEditor({ handleCloseModel }) {
 
   return (
     <div
-      className={`relative md:w-[700px] w-full md:h-auto h-screen md:rounded-xl  backdrop-blur-xl bg-black bg-opacity-80 border border-white border-opacity-10 flex flex-col bg-ternary overflow-hidden`}
+      className={`relative md:w-[700px] w-full md:h-auto h-[100vh] md:rounded-xl  backdrop-blur-xl bg-black bg-opacity-80 border border-white border-opacity-10 flex flex-col bg-ternary overflow-y-auto `}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex justify-between items-center gap-2 p-5">
+      <div className="sticky top-0 flex justify-between items-center gap-2 p-5 z-10 bg-ternary">
         {/* left */}
         <div className="flex justify-start items-center gap-2 ">
           <div className="relative w-[55px] h-[55px] border-2 border-white border-opacity-30 rounded-full p-[2px]">
@@ -171,10 +171,10 @@ export default function CEditor({ handleCloseModel }) {
           editor={editor}
           tableHandles={false}
           onChange={onChange}
-          className="font-inter text-[14px] md:h-[400px] w-full overflow-y-auto flex-1 h-auto "
+          className="font-inter text-[14px] md:h-[400px] w-full flex-1 h-auto  md:overflow-y-auto overflow-y-hidden"
         />
       </div>
-      <div className="relative w-full border-t border-white border-opacity-10 py-3 px-4 flex justify-between items-center">
+      <div className="sticky bottom-0  w-full border-t border-white border-opacity-10 py-3 px-4 flex justify-between items-center bg-ternary z-10">
         <div className="flex justify-center items-start gap-2">
           <MdImage size={20} />
           <BsFillCameraVideoFill size={20} />

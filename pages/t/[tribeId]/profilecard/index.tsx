@@ -11,27 +11,27 @@ import { BsFillPatchCheckFill } from "react-icons/bs";
 
 const Index = () => {
   let router = useRouter();
-  const [user, setUser] = useState(null);
+  const [tribe, setTribe] = useState(null);
   const [loading, setLoading] = useState(false);
-  let username = router.query.username;
+  let tribeId = router.query.tribeId;
 
-  const handleFetchProfileData = async ({ username }) => {
+  const handleFetchProfileData = async ({ tribeId }) => {
     setLoading(true);
     let response = await callAPI({
-      endpoint: `/v1/profiles/user/${username}`,
+      endpoint: `/v1/profiles/tribe/${tribeId}/profilecard`,
     });
 
     if (response.success) {
-      setUser(response?.data);
+      setTribe(response?.data?.tribe);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    if (username) {
-      handleFetchProfileData({ username });
+    if (tribeId) {
+      handleFetchProfileData({ tribeId });
     }
-  }, [username]);
+  }, [tribeId]);
   return (
     <div className="flex justify-center items-center w-full h-screen">
       <FlipCard
@@ -40,20 +40,20 @@ const Index = () => {
           <div className="relative w-full h-full rounded-[30px] overflow-hidden bg-secondary">
             <div className="relative z-0 w-full h-[200px] bg-ternary">
               <Image
-                src={user?.bannerImage || "/images/Future.svg"}
-                alt={user?.name}
+                src={tribe?.tribeHorizontalBanner || "/images/Future.svg"}
+                alt={tribe?.tribeHorizontalBanner}
                 width={500}
                 height={500}
                 className={`relative w-full h-full object-cover ${
-                  !user?.bannerDisplayImage && "brightness-75"
+                  !tribe?.tribeHorizontalBanner && "brightness-75"
                 }`}
               />
             </div>
             <div className="md:w-[250px] w-[200px] md:h-[250px] h-[200px] mx-auto rounded-full overflow-hidden border-[10px] border-secondary relative  -mt-[75px] flex justify-center items-center bg-ternary  ">
-              {user?.profileImage ? (
+              {tribe?.tribeLogo ? (
                 <Image
-                  src={user?.profileImage}
-                  alt={user?.name}
+                  src={tribe?.tribeLogo}
+                  alt={tribe?.tribeId}
                   width={500}
                   height={500}
                   className="relative w-full h-full object-cover"
@@ -64,7 +64,7 @@ const Index = () => {
             </div>
 
             <article className=" text-center mt-2  font-graffiti  text-primary ">
-              {user?.role == "User" ? "#SportsFan" : "#Athlete"}
+              #Tribe
             </article>
 
             <div className="flex flex-col justify-center items-center mt-4  space-y-1">
@@ -73,7 +73,7 @@ const Index = () => {
                   className={`bg-secondary w-[100px] h-[18px] rounded-md mb-1`}
                 />
               ) : (
-                <span className="text-[14px] font-inter">{user?.username}</span>
+                <span className="text-[14px] font-inter">{tribe?.tribeShortName}</span>
               )}
               {loading ? (
                 <Skeleton
@@ -81,10 +81,10 @@ const Index = () => {
                 />
               ) : (
                 <div className="flex  justify-start items-center">
-                  <article className="text-2xl font-inter font-semibold">
-                    {user?.name}
+                  <article className="text-base text-center font-inter font-semibold">
+                    {tribe?.tribeName}
                   </article>
-                  {user?.isVerified && (
+                  {tribe?.isVerified && (
                     <BsFillPatchCheckFill
                       size={18}
                       className="text-indigo-500 ml-1"
@@ -93,24 +93,15 @@ const Index = () => {
                 </div>
               )}
               <div className="flex justify-start items-center gap-4 font-inter text-[12px] font-bold">
-                {loading ? (
-                  <Skeleton
-                    className={`bg-secondary w-[50px] h-[18px] rounded-md mb-1`}
-                  />
-                ) : (
-                  <div className="flex justify-start gap-2">
-                    <span>{formatNumber(user?._count?.followers)}</span>
-                    <span className="font-semibold opacity-50">Followers</span>
-                  </div>
-                )}
+               
                 {loading ? (
                   <Skeleton
                     className={`bg-secondary  w-[50px] h-[18px] rounded-md mb-1`}
                   />
                 ) : (
                   <div className="flex justify-start gap-2">
-                    <span>{formatNumber(user?._count?.following)}</span>
-                    <span className="font-semibold opacity-50">Following</span>
+                    <span>{formatNumber(tribe?._count?.members)}</span>
+                    <span className="font-semibold opacity-50">Members</span>
                   </div>
                 )}
               </div>
@@ -131,21 +122,19 @@ const Index = () => {
           <div
             className=" relative w-full h-full rounded-[30px] flex flex-col justify-center items-center "
             style={{
-              background: `linear-gradient(to top right, #8A2387, #E94057, #F27121)`,
+              background: `linear-gradient(to top right, ${tribe?.theme?.primaryColorHex}, ${tribe?.theme?.secondaryColorHex}, ${tribe?.theme?.ternaryColorHex})`,
             }}
           >
             <ReactQRCode
-              value={`${process.env.NEXT_PUBLIC_APP_URL}/${
-                user?.role === "User" ? "p" : "a"
-              }/${user?.username}`}
+              value={`${process.env.NEXT_PUBLIC_APP_URL}/t/${tribe?.tribeId}`}
               bgColor="transparent"
               fgColor="#fff"
               className="w-[225px] h-[225x]"
             />
             <article className="md:mt-10 mt-5 font-monumentUltraBold text-2xl -rotate-2">
-              {user?.username}
+              {tribe?.tribeId}
             </article>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2">
               <Image
                 src={"/images/logos/logo-transparent.png"}
                 alt="mvpz"
@@ -157,9 +146,7 @@ const Index = () => {
           </div>
         )}
         cardHeight={
-          user?.athleteCard
-            ? "md:h-[480px] h-[420px]"
-            : "md:h-[550px] h-[500px]"
+         "md:h-[550px] h-[500px]"
         }
         cardWidth="md:w-[350px] w-[300px]"
       />
