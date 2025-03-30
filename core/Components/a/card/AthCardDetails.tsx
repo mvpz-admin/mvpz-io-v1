@@ -29,6 +29,8 @@ import { useIsDesktop } from "../../../../hooks/useIsDesktop";
 import { useCardDetailsStore } from "../../../../store/useAthCollectionStore";
 import { useBuyStore, useCartStore } from "../../../../store/useGlobalStore";
 import { Modal, Radio, Button } from "@mantine/core";
+import ShareModel from "../../Widgets/ShareModel";
+import CardView from "./CardView";
 
 const AthCardDetails = ({ propCardId = null, model = false }) => {
   const swiperRef = useRef(null);
@@ -41,9 +43,11 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
   const [actionType, setActionType] = useState<"buy" | "cart">("buy");
   const [viewType, setViewType] = useState<"2D" | "3D">("2D");
   const [eventType, setEventType] = useState<"buy" | "cart">(null);
+  const [showShareModal, setShowShareModal] = useState(false);
   const router = useRouter();
   const cardId = propCardId || router.query.cardId;
   const username = router.query.username;
+  const [showCardViewModal, setShowCardViewModal] = useState(false);
   const {
     addToCartCard,
     removeFromCartCard,
@@ -82,12 +86,7 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
     }
   };
 
-  const handleCopyUrl = () => {
-    const currentUrl = window.location.href;
-    navigator.clipboard.writeText(currentUrl);
-    setShowCopyEffect(true);
-    setTimeout(() => setShowCopyEffect(false), 2000);
-  };
+
 
   const handleAddToCart = () => {
     if (!cardDetailsData?.card?.hasBaseCard?.hasCard) {
@@ -333,7 +332,7 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
           <div
             className={`lg:sticky relative lg:top-0 lg:flex-[4]  w-full lg:h-full h-[450px] lg:rounded-lg !overflow-hidden ${
               cardDetailsDataLoading ? "border-0" : "lg:border border-0"
-            } border-white border-opacity-20 bg-secondary `}
+            } border-white border-opacity-20 bg-secondary overflow-hidden `}
           >
             {/* asbolute */}
             {!cardDetailsDataLoading && (
@@ -359,7 +358,11 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                   />
 
                   <div className="absolute bottom-0 left-0 p-5  w-full lg:h-[200px] bg-gradient-to-b from-transparent to-black  flex flex-row  justify-between items-end  z-10 gap-2">
+
                     <div className="flex justify-start items-center ">
+                      <div className="mr-4 w-[50px] h-[16px] border border-white border-opacity-20 p-[2px]">
+                        <div className="w-[50%] h-full bg-white bg-opacity-75" />
+                      </div>
                       <article
                         className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
                         style={{
@@ -369,7 +372,7 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                       >
                         2D
                       </article>
-                      <div className="w-[1px] h-[10px] bg-white bg-opacity-20 mx-1" />
+                    <span className="text-[10px] font-monumentUltraBold font-semibold uppercase opacity-80 mx-1">/</span>
                       <article
                         className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
                         style={{
@@ -385,21 +388,14 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                       <div className="flex flex-col justify-center items-end ">
                         <div className="flex  justify-start items-center">
                           <article className="text-sm font-monumentUltraBold font-semibold ">
-                            TRIBE
+                            TRIBE:
                           </article>
                         </div>
                         <div className="flex justify-start items-center space-x-1">
                           {" "}
-                          <span className="text-[12px] font-inter">
-                            <span>
-                              ver{cardDetailsData?.card?.avatar?.verseion}
-                            </span>{" "}
-                            <span>
-                              {cardDetailsData?.card?.avatar?.edition}
-                            </span>
-                          </span>
-                          <span className="text-[12px] font-inter">
-                            {cardDetailsData?.card?.avatar?.title}
+                          
+                          <span className="text-[10px] font-monumentUltraBold font-semibold uppercase opacity-80">
+                           !{cardDetailsData?.card?.avatar?.title}
                           </span>
                         </div>
                       </div>
@@ -498,16 +494,9 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
                     </>
                   ) : (
                     <>
-                      <IoIdCard className="lg:block hidden" />
-                      <FaShare className="lg:block hidden" />
-                      <div className="relative">
-                        <MdContentCopy
-                          className={`cursor-pointer transition-all duration-300 ${
-                            showCopyEffect ? "text-[#854df2]" : ""
-                          }`}
-                          onClick={handleCopyUrl}
-                        />
-                      </div>
+                      <IoIdCard className="lg:block hidden"  onClick={() => setShowCardViewModal(true)}/>
+                      <FaShare className="lg:block hidden"  onClick={() => setShowShareModal(true)}/>
+                    
                     </>
                   )}
                 </div>
@@ -771,6 +760,17 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
           </Button>
         </div>
       </Modal>
+      {showShareModal && (
+        <ShareModel
+          title="Share Card"
+          pathname={`/a/${username}/card/${cardId}`}
+          closeModel={() => setShowShareModal(false)}
+        />
+      )}
+      {showCardViewModal && (
+        <CardView cardDetailsData={cardDetailsData} closeModel={() => setShowCardViewModal(false)} />
+      )}
+      {/*  */}
     </div>
   );
 };
