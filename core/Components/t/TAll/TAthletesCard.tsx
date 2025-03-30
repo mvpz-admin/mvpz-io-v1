@@ -23,7 +23,7 @@ const TAthletesCard = ({ athletes, loading }) => {
 
   return (
     <div
-      className={`relative w-full h-[375px]  flex flex-wrap justify-start items-center gap-2 ${
+      className={`relative w-full  grid lg:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5   mb-10 ${
         athletes?.length < 5 && "md:px-10 px-5"
       }`}
     >
@@ -45,14 +45,14 @@ const Card = ({ ath, loading }) => {
   const router = useRouter();
   return (
     <div
-      className="relative w-[280px]  h-[375px] rounded-lg bg-secondary overflow-hidden transition-all duration-300 cursor-pointer"
+      className="relative w-full md:h-[375px] h-[250px] rounded-lg bg-secondary overflow-hidden transition-all duration-300 cursor-pointer"
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       onClick={() => router.push(`/a/${ath.username}`)}
     >
       {/* images */}
       <div className="absolute top-0 left-0 w-full h-full rounded-lg bg-secondary">
-        {!loading && (
+        {!loading && ath?.verticalImage && (
           <Image
             src={ath?.verticalImage}
             alt="bg"
@@ -66,7 +66,7 @@ const Card = ({ ath, loading }) => {
       </div>
       {/* layer */}
       <div className="absolute top-0 left-0 w-full h-full  bg-gradient-to-t from-[rgba(0,0,0,0.8)] to-transparent p-2 flex flex-col justify-end items-start">
-        <div className="flex justify-start items-center gap-2">
+        <div className="flex md:flex-row flex-col justify-start md:items-center items-start gap-2">
           <div
             className={`relative w-[55px] h-[55px] ${
               loading ? "border-0" : "border-2"

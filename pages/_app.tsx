@@ -82,7 +82,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             // mvpz: ['#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff','#8c52ff']
           },
           primaryColor: "mvpz",
-          fontFamily: "MonumentExtended-Regular",
+          fontFamily: "inter",
         }}
       >
         <Notifications position="top-right" autoClose={5000} />
@@ -100,13 +100,13 @@ const App = ({ Component, pageProps }: AppProps) => {
         </SessionProvider>{" "}
       </MantineProvider>
       <InstallPWA />
-      <OnboardingModal
+     { <OnboardingModal
         opened={showOnboarding}
         onClose={() => {
           setShowOnboarding(false);
           localStorage.setItem('hasSeenOnboarding', 'true');
         }}
-      />
+      />}
     </>
   );
 };

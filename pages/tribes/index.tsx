@@ -64,7 +64,7 @@ const Index = () => {
         <div className="absolute top-0 left-0 w-full h-full z-5 backdrop-blur-3xl"></div>
 
         {/* content */}
-        <div className="absolute top-0 left-0 w-full z-10 pt-28 space-y-10">
+        <div className="absolute top-0 left-0 w-full z-10 md:pt-28 pt-5 space-y-10">
           {/* Below content */}
           <div className="relative w-full  px-2  ">
             <TribeSlider
@@ -75,10 +75,10 @@ const Index = () => {
             />
           </div>
 
-          {isLoggedIn && pageData?.myTribes?.lenght > 0 && (
+          {isLoggedIn && pageData?.myTribes?.length > 0 && (
             <div className="relative w-full  space-y-4 md:px-10 px-2">
              {!pageDataLoading &&  (<div className="relative w-full ">
-                <article className="font-inter font-bold">My Teams</article>
+                <article className="font-inter font-bold">My Tribes</article>
               </div>)}
               <TribeList
                 tribes={pageData?.myTribes}
@@ -89,7 +89,7 @@ const Index = () => {
           {/* Payler Cards */}
           <div className="relative w-full space-y-4 md:px-10 px-2">
           {!pageDataLoading && ( <div className="relative  ">
-              <article className="font-inter font-bold">Other Teams</article>
+              <article className="font-inter font-bold">Other Tribes</article>
             </div>)}
             <TribeList
               tribes={pageData?.otherTribes}

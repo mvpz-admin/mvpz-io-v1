@@ -108,6 +108,9 @@ const Section2Fanzone = async ({ user }) => {
   if (!user) {
     tribes = await prisma.tribe
       .findMany({
+        where : {
+          deactivate : false
+        },
         select: {
           id: true,
           tribeId: true,
@@ -143,6 +146,7 @@ const Section2Fanzone = async ({ user }) => {
     tribes = await prisma.tribe
       .findMany({
         where: {
+        deactivate : false,
           members: {
             none: {
               userId: user.id,

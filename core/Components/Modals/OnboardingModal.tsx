@@ -419,7 +419,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
           }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <p className="text-gray-400 text-lg">Initializing game elements...</p>
+        <p className="text-gray-400 md:text-sm text-xs">Website is getting ready for you...</p>
         </motion.div>
       </motion.div>
 
@@ -434,7 +434,7 @@ const OnboardingModal = ({ opened, onClose }: OnboardingModalProps) => {
     if (step === totalSteps) {
       setShowLoading(true);
       setTimeout(() => {
-        // onClose();
+        onClose();
       }, 10000);
     } else {
       setStep(step + 1);

@@ -239,14 +239,9 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
     <div className={`relative lg:px-10 px-2  md:py-[25px] h-screen  `}>
       <div className="relative w-full h-full overflow-y-auto border border-white border-opacity-20 rounded-3xl flex flex-col space-y-5 p-5">
         {/* close button */}
-        <div
-          className="absolute top-5 right-5 w-14 h-14 rounded-full border border-white border-opacity-20 flex justify-center items-center"
-          onClick={() => router.push(`/a/${username}/collections`)}
-        >
-          <IoClose className="text-[30px]" />
-        </div>
+     
         {/* top related card slider for desktop */}
-        <div className="flex flex-row justify-between items-center gap-2">
+        <div className="flex md:flex-row flex-col-reverse md:justify-between justify-center md:items-center item-start gap-2 ">
           <div className=" lg:w-[42%] w-full flex  justify-between items-center gap-2 lg:h-[55px] h-[45px] select-none ">
             {cardDetailsData?.relatedCards?.cards?.length > 5 && (
               <div
@@ -326,6 +321,12 @@ const AthCardDetails = ({ propCardId = null, model = false }) => {
               </div>
             )}
           </div>
+          <div
+          className=" w-14 h-14 rounded-full border border-white border-opacity-20 flex justify-center items-center"
+          onClick={() => !cardDetailsDataLoading && router.push(`/a/${username}/collections`)}
+        >
+          <IoClose className="text-[30px]" />
+        </div>
         </div>
         {/* below card details conetent */}
         <div className="relative w-full flex-1 flex lg:flex-row flex-col lg:justify-between lg:h-full lg:gap-20 gap-5 lg:overflow-y-auto">

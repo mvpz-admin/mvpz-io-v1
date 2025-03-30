@@ -5,7 +5,7 @@ import prisma from "../../../../../../lib/prisma";
 import { methodGuard } from "../../../../../../utils/global/methodNotAllowed";
 
 const getEventImage = ({ image }) => {
-  if (!image) return null;
+  if (!image) return "";
   if (image.includes("https://")) {
     return image;
   } else {
@@ -31,23 +31,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           about: true,
           tribeLogo: true,
           tribeHorizontalBanner: true,
+          deactivate: true,
+          organisation : {
+            select : {
+              primaryColorHex : true,
+              secondaryColorHex : true,
+              ternaryColorHex : true,
+            }
+          },
           members: {
             where: {
               userId: user?.id,
-            },
-          },
-          athletes: {
-            select: {
-              athlete: {
-                select: {
-                  id: true,
-                  name: true,
-                  username: true,
-                  profileImage: true,
-                  verticalImage: true,
-                  isVerified: true,
-                },
-              },
             },
           },
           _count: {
@@ -57,8 +51,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       })
-      ?.then((res) => {
-        const { members, athletes, ...otherData } = res;
+      ?.then(async (res) => {
+        const { members, organisation, ...otherData } = res;
+        let athletes  = await prisma.tribeAthlete.findMany({
+          where : {
+            tribeId : otherData?.id,
+          },
+          select: {
+            athlete: {
+              where : {
+                isMvpzAccount : false,
+                isAnonymous : false,
+                isMvpzTestingAccount : false,
+              },
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                profileImage: true,
+                verticalImage: true,
+                isVerified: true,
+              },
+            },
+          },
+        }).then((res) => {
+          return res?.filter((athlete) => athlete?.athlete?.id)
+        }).then((filteredAthletes) => {
+          return filteredAthletes?.map((data) => ({
+            ...data.athlete,
+            verticalImage: getEventImage({ image: data?.athlete?.verticalImage }),
+            profileImage: getEventImage({ image: data?.athlete?.profileImage }),
+          }))
+        })
         return {
           ...otherData,
           tribeHorizontalBanner: getEventImage({
@@ -66,20 +90,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }),
           tribeLogo: getEventImage({ image: otherData?.tribeLogo }),
           isMember: members?.length > 0,
-          athletes: athletes?.map((data) => ({
-            ...data.athlete,
-            verticalImage: getEventImage({ image: data.athlete.verticalImage }),
-            profileImage: getEventImage({ image: data.athlete.profileImage }),
-          }) ),
+          athletes,
+          theme : {
+            primaryColorHex : organisation?.primaryColorHex,
+            secondaryColorHex : organisation?.secondaryColorHex,
+            ternaryColorHex : organisation?.ternaryColorHex,
+          }
         };
-      });
+      })
 
     if (!tribe) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
     return res.status(200).json({
-      success: true,
+      success: true, 
       data: {
         tribe,
       },

@@ -138,6 +138,9 @@ const Sections3Tribes = async ({ user }) => {
   if (!user) {
     tribes = await prisma.tribe
       .findMany({
+        where : {
+          deactivate : false
+        },
         select: {
           id: true,
           tribeId: true,
@@ -173,6 +176,7 @@ const Sections3Tribes = async ({ user }) => {
     tribes = await prisma.tribe
       .findMany({
         where: {
+          deactivate : false,
           members: {
             none: {
               userId: user.id, // Excludes tribes where the user is a member

@@ -33,7 +33,7 @@ const TAthletes = ({ tribeId }) => {
     <div className="relative w-full px-2 overflow-hidden">
       <div className="relative w-full ">
         {/* Athlete */}
-        <div className="relative w-full  space-y-4 mb-10">
+        <div className="relative w-full  space-y-4 mb-10 ">
          
           <TAthletesCard
             athletes={pageData?.topAthletes}

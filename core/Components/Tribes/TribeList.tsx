@@ -8,7 +8,7 @@ import Skeleton from "../../Atoms/Others/Skeleton";
 
 const TribeList = ({ tribes, pageDataLoading, suggestions = false }) => {
   return (
-    <div className="relative w-full flex flex-wrap justify-between items-center gap-y-10 ">
+    <div className="relative w-full md:flex grid md:flex-wrap md:justify-start md:items-center grid-cols-2 gap-y-10 gap-x-5 ">
       {pageDataLoading
         ? Array(8)
             ?.fill(0)
@@ -39,15 +39,19 @@ const TribeList = ({ tribes, pageDataLoading, suggestions = false }) => {
 const Card = ({ tribe, suggestions, pageDataLoading }) => {
   const router = useRouter();
   const [isHover, setIsHover] = useState(false);
+  console.log({
+    tribe
+  });
+  
   return (
     <div
-      className="relative w-[250px] h-[325px] rounded-lg bg-secondary overflow-hidden transition-all duration-300 border border-white border-opacity-5 cursor-pointer"
+      className="relative md:w-[250px] w-full md:h-[325px] h-[250px] rounded-lg bg-secondary overflow-hidden transition-all duration-300 border border-white border-opacity-5 cursor-pointer"
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
       {/* images */}
       <div className="absolute top-0 left-0 w-full h-full rounded-lg bg-secondary  overflow-hidden">
-        {!pageDataLoading && (
+        {!pageDataLoading && tribe?.tribeVerticalBanner ? (
           <Image
             src={tribe?.tribeVerticalBanner}
             alt="bg"
@@ -57,12 +61,23 @@ const Card = ({ tribe, suggestions, pageDataLoading }) => {
               isHover ? "scale-105" : "scale-100"
             }`}
           />
+        ) : (
+          <div
+          className="absolute top-0 left-0 w-full h-full"
+          style={{
+            background: tribe?.theme?.primaryColorHex,
+           
+          }}
+        >
+          <article className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-2xl font-bold font-monumentUltraBold text-center">{tribe?.tribeShortName?.split(" ")[0]}</article>
+        </div>
         )}
+       
       </div>
       {/* layer */}
       <div className="absolute top-0 left-0 w-full h-full  bg-gradient-to-t from-[rgba(0,0,0,0.8)] to-transparent p-2 flex flex-col justify-end items-start">
         {/* content */}
-        <div className="flex justify-start items-center gap-2">
+        <div className="flex md:flex-row flex-col justify-start md:items-center items-start gap-2">
           <div className="relative  w-[55px] h-[55px] border-2 border-white border-opacity-30 rounded-lg p-[2px]">
             <div className="relative w-full h-full bg-secondary rounded-lg overflow-hidden">
               {!pageDataLoading && (
@@ -114,24 +129,27 @@ const Card = ({ tribe, suggestions, pageDataLoading }) => {
               className="absolute top-2 right-2 flex justify-start items-center gap-2 px-2 py-2 backdrop-blur-lg rounded-lg bg-black bg-opacity-50 border border-white border-opacity-10 "
               onClick={() => router.push(`/t/${tribe?.tribeId}`)}
             >
-              <span className="font-inter text-xs font-bold">Join Now</span>
+              <span className="font-inter md:text-xs text-[10px] font-bold">
+                {tribe?.deactivate ? "Join Waitlist" : "Join Now"}
+              </span>
             </div>
           ))}
         {/* New Join */}
-        {!suggestions && (
-           pageDataLoading ? (
+        {!suggestions &&
+          (pageDataLoading ? (
             <Skeleton
               className={`absolute top-2 right-2 bg-secondary w-[105px] h-[40px] rounded-md mb-1`}
             />
-          ) : (<div
-            className="absolute top-2 right-2 flex justify-start items-center gap-2 px-2 py-2 backdrop-blur-lg rounded-lg bg-primary bg-opacity-50 border border-white border-opacity-10 "
-            onClick={() => router.push(`/t/${tribe?.tribeId}/community`)}
-          >
-            <span className="font-inter text-xs font-bold">
-              Go To Community
-            </span>
-          </div>)
-        )}
+          ) : (
+            <div
+              className="absolute top-2 right-2 flex justify-start items-center gap-2 px-2 py-2 backdrop-blur-lg rounded-lg bg-white bg-opacity-10 border border-white border-opacity-10 "
+              onClick={() => router.push(`/t/${tribe?.tribeId}/community`)}
+            >
+              <span className="font-inter md:text-xs text-[10px] font-bold">
+                Go To Community
+              </span>
+            </div>
+          ))}
       </div>
     </div>
   );

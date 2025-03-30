@@ -265,7 +265,7 @@ const LoginHeader = () => {
                    </div>
                   )}
                 </div>
-                <div
+                {/* <div
                   className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
                   onMouseEnter={() => setShowUtilitiesInfo(true)}
                   onMouseLeave={() => setShowUtilitiesInfo(false)}
@@ -282,7 +282,7 @@ const LoginHeader = () => {
                   </div>
 
                   {showUtilitiesInfo && <UtilitiesBar />}
-                </div>
+                </div> */}
               </div>
               <div className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
               onClick={setOpenNotificationsModel}>

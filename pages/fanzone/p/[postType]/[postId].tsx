@@ -22,7 +22,7 @@ const Index = () => {
     <FanzoneLayout>
       <div className="relative w-full min-h-screen">
         {/* bg-gradient */}
-        <div className="absolute w-full h-[450px] z-0">
+        {/* <div className="absolute w-full h-[450px] z-0">
           <div className="absolute top-0 left-0 w-full h-full z-0 transition-all duration-500">
             <Image
               src={
@@ -35,7 +35,7 @@ const Index = () => {
             />
           </div>
           <div className="absolute top-0 left-0 w-full h-full z-5 bg-gradient-to-b from-transparent to-black"></div>
-        </div>
+        </div> */}
         {/* bg-blur */}
         <div className="absolute top-0 left-0 w-full h-full z-5 backdrop-blur-3xl lg:px-10 md:px-5 px-2 pt-5 pb-24 md:pt-[125px] overflow-y-auto space-y-10 ">
           <div className="w-full  flex justify-center items-center   ">

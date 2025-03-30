@@ -5,9 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { AiFillTrophy } from "react-icons/ai";
-import {
-  FaCompass,
-} from "react-icons/fa";
+import { FaCompass } from "react-icons/fa";
 import { FaHandFist, FaSquarePlus } from "react-icons/fa6";
 import { HiSpeakerphone } from "react-icons/hi";
 import { PiFilmSlateFill, PiNewspaperClippingFill } from "react-icons/pi";
@@ -18,6 +16,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useLoginProcessStore } from "../../store/useGlobalStore";
 import { callAPI } from "../../lib/utils";
 import { RiTeamFill } from "react-icons/ri";
+import Skeleton from "../Atoms/Others/Skeleton";
 
 const PostEditor = dynamic(
   () => import("../../core/Components/Fanzone/CEditor"),
@@ -87,6 +86,36 @@ const TribeLinksSections = ({ title = null, list = [], loading }) => {
   const handleNavigate = (item) => {
     router.push(item?.url);
   };
+
+  let Link = ({ item, loading }) => {
+    return (
+      <div
+        className={`flex justify-start items-center p-2 gap-3 bg-white bg-opacity-0   hover:bg-opacity-10 rounded-lg cursor-pointer transition-all duration-300`}
+        onClick={() => !loading && handleNavigate(item)}
+      >
+        <div className="w-[22px] h-[22px] relative rounded-full overflow-hidden bg-secondary">
+          {item?.tribeLogo && (
+            <Image
+              src={item?.tribeLogo}
+              alt="thumbnail"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-full overflow-hidden scale-150"
+            />
+          )}
+        </div>
+
+        {loading ? (
+          <Skeleton className="w-full h-[18px] rounded-lg flex-1" />
+        ) : (
+          <article className="md:block hidden text-sm font-inter font-semibold opacity-90">
+            {item?.tribeShortName}
+          </article>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="relative w-full pb-5 mb-5 border-b border-white border-opacity-10 space-y-2">
       {title && (
@@ -94,30 +123,71 @@ const TribeLinksSections = ({ title = null, list = [], loading }) => {
           {title}
         </article>
       )}
-      {list?.map((item) => {
-        return (
-          <div
-            className={`flex justify-start items-center p-2 gap-3 bg-white bg-opacity-0   hover:bg-opacity-10 rounded-lg cursor-pointer transition-all duration-300`}
-            onClick={() => handleNavigate(item)}
-          >
-            <div className="w-[22px] h-[22px] relative rounded-full overflow-hidden bg-secondary">
-              {item?.tribeLogo && (
-                <Image
-                  src={item?.tribeLogo}
-                  alt="thumbnail"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-full overflow-hidden scale-150"
-                />
-              )}
-            </div>
+      {loading
+        ? Array(5)
+            ?.fill(0)
+            ?.map((_, idx) => {
+              return <Link key={idx} item={_} loading={loading} />;
+            })
+        : list?.map((item, idx) => {
+            return <Link key={idx} item={item} loading={loading} />;
+          })}
+    </div>
+  );
+};
 
-            <article className="md:block hidden text-sm font-inter font-semibold opacity-90">
-              {item?.tribeShortName}
-            </article>
-          </div>
-        );
-      })}
+const AthleteLinksSections = ({ title = null, list = [], loading }) => {
+  const router = useRouter();
+
+  const handleNavigate = (item) => {
+    router.push(item?.url);
+  };
+
+  let Link = ({ item, loading }) => {
+    return (
+      <div
+        className={`flex justify-start items-center p-2 gap-3 bg-white bg-opacity-0   hover:bg-opacity-10 rounded-lg cursor-pointer transition-all duration-300`}
+        onClick={() => !loading && handleNavigate(item)}
+      >
+        <div className="w-[22px] h-[22px] relative rounded-full overflow-hidden bg-secondary">
+          {item?.profileImage && (
+            <Image
+              src={item?.profileImage}
+              alt="thumbnail"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-full overflow-hidden scale-150"
+            />
+          )}
+        </div>
+
+        {loading ? (
+          <Skeleton className="w-full h-[18px] rounded-lg flex-1" />
+        ) : (
+          <article className="md:block hidden text-sm font-inter font-semibold opacity-90">
+            {item?.name}
+          </article>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="relative w-full pb-5 mb-5 border-b border-white border-opacity-10 space-y-2">
+      {title && (
+        <article className="md:block hidden text-[12px] font-nato font-normal opacity-50 px-2">
+          {title}
+        </article>
+      )}
+      {loading
+        ? Array(5)
+            ?.fill(0)
+            ?.map((_, idx) => {
+              return <Link key={idx} item={_} loading={loading} />;
+            })
+        : list?.map((item, idx) => {
+            return <Link key={idx} item={item} loading={loading} />;
+          })}
     </div>
   );
 };
@@ -128,6 +198,7 @@ export default function FanzoneLayout({ children }) {
   const { uploading } = useFeedStore((state) => state);
   const isLoggedIn = useAuthStore((state) => state.user)?.token;
   const [myTribes, setMyTribes] = useState([]);
+  const [athletes, setAthletes] = useState([]);
   const [tribesLoading, setTribesLoading] = useState(false);
   let post = router.query.p;
 
@@ -138,7 +209,9 @@ export default function FanzoneLayout({ children }) {
         endpoint: "/v1/fanzone/myTribes",
       });
 
-      setMyTribes(response?.data);
+      setMyTribes(response?.data?.tribes);
+      setAthletes(response?.data?.athletes);
+      setTribesLoading(false);
     } catch (error) {
       console.log({ error });
     }
@@ -183,51 +256,49 @@ export default function FanzoneLayout({ children }) {
     }
   }, [router.query]);
 
-  let mainLinks =     isLoggedIn  ?[
+  let mainLinks = isLoggedIn
+    ? [
+        {
+          label: "Fanzone",
+          icon: RiTeamFill,
+          url: "/fanzone",
+        },
+        {
+          label: "Create",
+          icon: FaSquarePlus,
+          url: null,
+          func: handleOpenModel,
+        },
+        {
+          label: "Shouts",
+          icon: HiSpeakerphone,
+          url: "/shouts",
+        },
+        {
+          label: "Tribes",
+          icon: FaHandFist,
+          url: "/tribes",
+        },
+      ]
+    : [
+        {
+          label: "Fanzone",
+          icon: RiTeamFill,
+          url: "/fanzone",
+        },
+        {
+          label: "Create",
+          icon: FaSquarePlus,
+          url: null,
+          func: handleOpenModel,
+        },
 
-    {
-      label: "Fanzone",
-      icon: RiTeamFill,
-      url: "/fanzone",
-    },
-    {
-      label: "Create",
-      icon: FaSquarePlus,
-      url: null,
-      func: handleOpenModel,
-    },
-   {
-      label: "Shouts",
-      icon: HiSpeakerphone,
-      url: "/shouts",
-    },
-    {
-      label: "Tribes",
-      icon: FaHandFist,
-      url: "/tribes",
-    },
-    
-  ] : [
-
-    {
-      label: "Fanzone",
-      icon: RiTeamFill,
-      url: "/fanzone",
-    },
-    {
-      label: "Create",
-      icon: FaSquarePlus,
-      url: null,
-      func: handleOpenModel,
-    },
-   
-    {
-      label: "Tribes",
-      icon: FaHandFist,
-      url: "/tribes",
-    },
-    
-  ];
+        {
+          label: "Tribes",
+          icon: FaHandFist,
+          url: "/tribes",
+        },
+      ];
 
   let exploreLinks = [
     {
@@ -257,8 +328,6 @@ export default function FanzoneLayout({ children }) {
     },
   ];
 
-  
-
   return (
     <div className={`relative flex flex-row h-screen overflow-y-auto`}>
       {/* Sidebar */}
@@ -275,6 +344,19 @@ export default function FanzoneLayout({ children }) {
           <TribeLinksSections
             title={"Tribes Suggestions"}
             list={myTribes}
+            loading={tribesLoading}
+          />
+        )}
+        {isLoggedIn ? (
+          <AthleteLinksSections
+            title={"Followed Athletes"}
+            list={athletes}
+            loading={tribesLoading}
+          />
+        ) : (
+          <AthleteLinksSections
+            title={"Athletes Suggestions"}
+            list={athletes}
             loading={tribesLoading}
           />
         )}

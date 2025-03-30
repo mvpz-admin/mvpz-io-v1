@@ -15,6 +15,7 @@ import { callAPI } from "../../../lib/utils";
 import MenuOptions from "../../Atoms/Others/MenuOption";
 import { useRouter } from "next/router";
 import TJoinCommunityModel from "./TJoinCommunityModel";
+import { notifications } from "@mantine/notifications";
 
 const TProfileBar = ({
   children,
@@ -46,6 +47,16 @@ const TProfileBar = ({
           method: "PUT",
         });
 
+        if(response?.data?.isWaitlist){
+          setPageLoading(false);
+          setJoiningLoading(false);
+         return notifications.show({
+          title: "Waitlist Joined Successfully!",
+          message: "When the tribe is activated, you will be joined automatically!",
+          color: "green",
+         });
+        }
+
         setIsMember(response?.data?.isMember);
       } catch (error) {
         console.log({ error });
@@ -62,7 +73,7 @@ const TProfileBar = ({
       <div className="relative w-full h-[450px] z-0">
         {/* Bg Image */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-[#111] via-[#1f1f1f] to-[#2f2f2f] z-0">
-          {!pageDataLoading &&pageData?.tribe?.tribeHorizontalBanner && (
+          {!pageDataLoading &&pageData?.tribe?.tribeHorizontalBanner ? (
             <Image
               src={pageData?.tribe?.tribeHorizontalBanner}
               alt="bgimage"
@@ -70,6 +81,12 @@ const TProfileBar = ({
               height={1000}
               className="relative w-full h-full object-cover"
             />
+          ) : (
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage : `linear-gradient(to bottom, ${pageData?.tribe?.theme?.primaryColorHex}, ${pageData?.tribe?.theme?.secondaryColorHex})`,
+            }}>
+              <article className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white md:text-6xl text-2xl font-bold font-monumentUltraBold text-center">{pageData?.tribe?.tribeShortName}</article>
+            </div>
           )}
         </div>
         {/* Bglayer */}
@@ -85,7 +102,7 @@ const TProfileBar = ({
                   pageDataLoading ? "border-opacity-20" : "border-opacity-100"
                 } rounded-lg p-[2p`}
               >
-                <div className="relative w-full h-full bg-ternary rounded-lg overflow-hidden">
+                <div className="relative w-full h-full bg-ternary rounded-lg overflow-hidden" onClick={() => !pageDataLoading && router.push(`/t/${tribeId}`)}>
                   {!pageDataLoading && pageData?.tribe?.tribeLogo && (
                     <Image
                       src={pageData?.tribe?.tribeLogo}
@@ -163,7 +180,7 @@ const TProfileBar = ({
                       }`}
                       onClick={() => !joiningLoading && handleToggleJoin()}
                     >
-                      {!isMember ? "Join Tribe" : "Leave Tribe"}
+                      {!isMember ? pageData?.tribe?.deactivate ? "Join Waitlist" :  "Join Tribe" : "Leave Tribe"}
                     </div>
                   )
                 ) : (

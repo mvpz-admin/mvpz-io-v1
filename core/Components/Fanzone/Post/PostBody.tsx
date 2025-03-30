@@ -21,7 +21,7 @@ const PostBody = ({pageDataLoading,pageData}) => {
         </div>
       ) : (
         <div
-          className="relative w-full overflow-hidden text-[14px] font-inter font-semibold flex flex-col justify-center items-center"
+          className="relative w-full overflow-hidden text-[14px] font-inter font-semibold flex flex-col justify-start items-start"
           dangerouslySetInnerHTML={{ __html: pageData?.message }}
         />
       )}

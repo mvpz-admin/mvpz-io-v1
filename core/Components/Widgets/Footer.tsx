@@ -91,7 +91,7 @@ const Footer = () => {
             height={2000}
             className="relative w-[100px] object-cover cursor-pointer"
           />
-          <article className="md:text-xs text-[10px] font-inter md:font-semibold font-medium">The world’s first and largest digital marketplace for crypto collectibles and non-fungible tokens (NFTs). Buy, sell, and discover exclusive digital items.</article>
+          <article className="md:text-xs text-[10px] font-inter md:font-semibold font-medium">MVPz is a sports social network that is optimized to help college athletes monetize their fanbase. By elevating athletes, we enable them to become the drivers of social activity, influencing sports fans to establish supportive communities.</article>
         </div>
         {/* right section */}
         <div className="relative md:flex-[0.7] flex-1  md:flex grid grid-cols-3 justify-center items-start md:gap-20 gap-10">

@@ -19,6 +19,8 @@ import TProfileBar from "./TProfileBar";
 import Skeleton from "../../Atoms/Others/Skeleton";
 import TAthletes from "./TAthletes";
 import TAthletesCard from "./TAll/TAthletesCard";
+import TLiveList from "./TLive/TLiveList";
+import TMediaList from "./TMedia/TMediaList";
 
 const TPage = ({ tribeId }) => {
   const router = useRouter();
@@ -53,11 +55,15 @@ const TPage = ({ tribeId }) => {
   const RenderComponents = () => {
     switch (selectedTab) {
       case "Athletes":
-        return <TAthletes tribeId={tribeId} />;
+        return <TAthletesCard
+        athletes={pageData?.tribe?.athletes}
+        loading={pageDataLoading}
+      />;
       case "Media":
+        return <TMediaList />;
       case "Live":
-      case "Challenge":
-        return <TAll tribeId />;
+        return <TLiveList />;
+
     }
   };
 
@@ -68,7 +74,7 @@ const TPage = ({ tribeId }) => {
       pageDataLoading={pageDataLoading}
     >
       {/* /* Athlete More Info  */}
-      <div className="relative w-full  md:px-10 px-5 ">
+      <div className="relative w-full  md:px-10 px-5  ">
         {pageDataLoading ? (
           <>
             <Skeleton
@@ -121,14 +127,14 @@ const TPage = ({ tribeId }) => {
               </div>
             ))}
             <div
-              className={`flex justify-center px-4 py-2 rounded-full bg-white bg-opacity-0 hover:bg-opacity-10 border border-white border-opacity-0 font-inter font-semibold cursor-pointer text-sm`}
-              onClick={() => router.push(`/t/${tribeId}/challenges`)}
+              className={`flex justify-center px-4 py-2 rounded-full bg-white bg-opacity-0 border border-white border-opacity-0 font-inter font-semibold cursor-not-allowed text-sm opacity-50`}
+              // onClick={() => router.push(`/t/${tribeId}/challenges`)}
             >
               Challenges
             </div>
             <div
-              className={`flex justify-center px-4 py-2 rounded-full bg-white bg-opacity-0 hover:bg-opacity-10 border border-white border-opacity-0 font-inter font-semibold cursor-pointer text-sm`}
-              onClick={() => router.push(`/t/${tribeId}/utilities`)}
+              className={`flex justify-center px-4 py-2 rounded-full bg-white bg-opacity-0  border border-white border-opacity-0 font-inter font-semibold cursor-not-allowed text-sm opacity-50`}
+             
             >
               Utilities
             </div>
@@ -136,11 +142,10 @@ const TPage = ({ tribeId }) => {
         </div>
       </div>
       {/* Content */}
-      {/* {RenderComponents()} */}
-      <TAthletesCard
-        athletes={pageData?.tribe?.athletes}
-        loading={pageDataLoading}
-      />
+      <div className="w-full md:px-10 px-5">
+      {RenderComponents()}
+      </div>
+     
     </TProfileBar>
   );
 };

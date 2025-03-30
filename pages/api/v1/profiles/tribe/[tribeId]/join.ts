@@ -18,6 +18,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: "Tribe ID is required" });
     }
 
+    if (tribe.deactivate) {
+      const existingMember = await prisma.tribeWaitlist.findFirst({
+        where: {
+          userId: user?.id,
+          tribeId: tribe.id,
+        },
+      });
+
+      if (!existingMember) {
+        await prisma.tribeWaitlist.create({
+          data: {
+            userId: user?.id,
+            tribeId: tribe.id,
+          },
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          isWaitlist: true,
+        },
+        message: "Tribe is not active",
+      });
+    }
+
     const existingMember = await prisma.tribeMember.findFirst({
       where: {
         userId: user?.id,

@@ -33,7 +33,7 @@ const TribeSlider = ({
   return (
     <div className="relative w-full h-[400px]  flex justify-center items-center gap-2">
       <div
-        className="px-2 h-full rounded-lg bg-white bg-opacity-0 hover:bg-opacity-10 flex justify-center items-center cursor-pointer transition-all duration-300"
+        className="  px-2 h-full rounded-lg bg-white bg-opacity-0 hover:bg-opacity-10 md:flex hidden justify-center items-center cursor-pointer transition-all duration-300"
         onClick={slideLeft}
       >
         <FaAngleLeft size={18} className="text-white" />
@@ -71,7 +71,7 @@ const TribeSlider = ({
             })}
       </Swiper>
       <div
-        className="px-2 h-full rounded-lg bg-white bg-opacity-0 hover:bg-opacity-10 flex justify-center items-center cursor-pointer transition-all duration-300"
+        className="px-2 h-full rounded-lg bg-white bg-opacity-0 hover:bg-opacity-10 md:flex hidden justify-center items-center cursor-pointer transition-all duration-300"
         onClick={slideRight}
       >
         <FaAngleRight size={18} className="text-white" />
@@ -106,14 +106,14 @@ const TribeSlide = ({ tribe, pageDataLoading }) => {
       {/* layer */}
       <div className="absolute top-0 left-0 w-full h-full  bg-gradient-to-t from-[rgba(0,0,0,0.8)] to-transparent p-5 flex flex-col justify-end items-start">
         {/* content */}
-        <div className="relative w-full flex justify-between items-end">
+        <div className="relative w-full flex md:flex-row flex-col md:justify-between justify-start md:items-end items-start gap-5">
           {/* left side */}
           <div className="flex flex-col justify-start items-start gap-2">
             <div
               className={`relative w-[80px] h-[80px] border-2 border-white ${
                 pageDataLoading ? "border-opacity-20" : "border-opacity-30"
               } rounded-lg p-[2px]`}
-              onClick={() => router.push(`/t/${tribe?.tribeId}`)}
+              onClick={() => !pageDataLoading && router.push(`/t/${tribe?.tribeId}`)}
             >
               <div className="relative w-full h-full bg-ternary rounded-lg overflow-hidden">
               {!pageDataLoading && ( <Image
@@ -164,7 +164,7 @@ const TribeSlide = ({ tribe, pageDataLoading }) => {
           ) : (
             <div className="relative">
               <button
-                className={`relative flex-1 px-4 py-3 h-full text-xs font-inter font-bold rounded-lg transition-all duration-300 text-white backdrop-blur-lg border border-white border-opacity-40 bg-primary bg-opacity-10 hover:bg-opacity-20 `}
+                className={`relative flex-1 px-4 py-3 h-full text-xs font-inter font-bold rounded-lg transition-all duration-300 text-white backdrop-blur-lg border border-white border-opacity-40 bg-white bg-opacity-10 hover:bg-opacity-20 `}
                 onClick={() => router.push(`/t/${tribe?.tribeId}/community`)}
               >
                 Go To Community
