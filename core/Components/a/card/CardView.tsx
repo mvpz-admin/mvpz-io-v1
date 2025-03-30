@@ -45,7 +45,7 @@ const CardView = ({cardDetailsData, closeModel}) => {
          "md:h-[550px] h-[500px]"
         }
         cardWidth="md:w-[350px] w-[300px]"
-      />
+        />
        </div>
     </div>
   )

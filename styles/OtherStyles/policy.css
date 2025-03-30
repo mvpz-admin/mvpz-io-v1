@@ -1,0 +1,47 @@
+.policy-container{
+    font-size: 12px;
+    font-family: var(--font-inter);
+}
+
+.policy-container .hr{
+    margin: 20px 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    width: 100%;
+    height: 1px;
+}
+
+.policy-container h2{
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.policy-container h3{
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.policy-container p{
+    margin-bottom: 10px;
+}
+
+.policy-container ul{
+    margin-left: 20px;
+}
+
+.policy-container ul li{
+    margin-bottom: 10px;
+}
+
+.policy-container ul li .c7{
+   
+    opacity: 1;
+}
+
+.policy-container ul li .c5{
+    opacity: 0.8;
+}
+
+
+

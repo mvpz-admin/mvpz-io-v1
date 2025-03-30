@@ -3,14 +3,20 @@ import TextFeild from "../../Atoms/Inputs/TextFeild";
 import { socialMediaList } from "../../../lib/utils";
 import Image from "next/image";
 import Copyright from "./Copyright";
-
+import { useRouter } from "next/router";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { useCartStore, useLoginProcessStore } from "../../../store/useGlobalStore";
 const Footer = () => {
+  const router = useRouter();
+  const isLoggedIn = useAuthStore((state) => state.user);
+  const { setOpenLoginModel } = useLoginProcessStore((state) => state);
+  const {  setOpenModel : setOpenCartModel } = useCartStore((state) => state);
   return (
     <div className="relative md:p-10 p-4 pb-5 w-full  bg-secondary">
       {/* Top Sections */}
       <div className="relative w-full h-full grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-10">
         {/* Left Section */}
-        <div className="relative w-full space-y-4">
+        {/* <div className="relative w-full space-y-4">
           <div className="relative w-full md:space-y-2 space-y-1">
             <article className="font-inter md:text-xl text-base font-bold">
               Newsletter
@@ -32,13 +38,13 @@ const Footer = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* Middle Section - soical - desktop / Last Section - soical - mobile */}
-        <div className="relative  w-full space-y-4 md:flex hidden justify-start items-center flex-col">
+        <div className="relative  w-full space-y-4 md:flex hidden justify-start items-start flex-col">
           <article className="font-inter text-xl font-bold">
             Join the community
           </article>
-          <div className="flex justify-center items-center gap-5">
+          <div className="flex justify-start items-center gap-5">
             {socialMediaList?.map((provider) => {
               let Icon = provider.icon;
               return (
@@ -49,12 +55,15 @@ const Footer = () => {
             })}
           </div>
         </div>
+        <div></div>
         {/* Right Section */}
-        <div className="relative w-full space-y-4 flex  flex-col md:items-start items-center">
-          <article className="font-inter md:text-xl text-base font-bold">Need Help?</article>
+        <div className="relative w-full space-y-4 flex  flex-col md:items-end items-center">
+          <article className="font-inter md:text-xl text-base font-bold">
+            Need Help?
+          </article>
           <div className="relative">
             <a
-            href="mailTo:team@mvpz.io"
+              href="mailTo:team@mvpz.io"
               className={`relative flex-1 px-4 py-3 h-full md:text-sm text-xs font-semibold rounded-lg transition-all duration-300 text-white bg-primary bg-opacity-10 hover:bg-opacity-20  font-inter `}
             >
               Contact Us
@@ -91,69 +100,90 @@ const Footer = () => {
             height={2000}
             className="relative w-[100px] object-cover cursor-pointer"
           />
-          <article className="md:text-xs text-[10px] font-inter md:font-semibold font-medium">MVPz is a sports social network that is optimized to help college athletes monetize their fanbase. By elevating athletes, we enable them to become the drivers of social activity, influencing sports fans to establish supportive communities.</article>
+          <article className="md:text-xs text-[10px] font-inter md:font-semibold font-medium">
+            MVPz is a sports social network that is optimized to help college
+            athletes monetize their fanbase. By elevating athletes, we enable
+            them to become the drivers of social activity, influencing sports
+            fans to establish supportive communities.
+          </article>
         </div>
         {/* right section */}
         <div className="relative md:flex-[0.7] flex-1  md:flex grid grid-cols-3 justify-center items-start md:gap-20 gap-10">
           <div className="relative  flex-col flex justify-start items-center">
             <div className="relative w-full space-y-3">
-              <article className="md:text-base text-xs font-inter font-bold">Features</article>
+              <article className="md:text-base text-xs font-inter font-bold">
+                Features
+              </article>
               <div className="relative w-full md:space-y-2 space-y-1">
-                {
-                  ["Fanzone","Market","Swap", "Store", "Auction"]?.map((link, idx) => {
+                {[{label : "Fanzone", url : "/fanzone"}, {label : "Market", url : "/market"}, {label : "Swap", url : "/swap"}, {label : "Store", url : "/store"}, {label : "Auction", url : "/auction"}]?.map(
+                  (link, idx) => {
                     return (
-                      <article key={idx} className="md:text-xs text-[10px] font-medium font-inter">{link}</article>
-                    )
-                  })
-                }
+                      <article
+                        key={idx}
+                        className="md:text-xs text-[10px] font-medium font-inter"
+                        onClick={() => router.push(link.url)}
+                      >
+                        {link.label}
+                      </article>
+                    );
+                  }
+                )}
               </div>
             </div>
           </div>
           <div className="relative  flex-col flex justify-start items-center space-y-6 ">
             <div className="relative md:w-[150px] space-y-3">
-              <article className="md:text-base text-xs font-inter font-bold">My Account</article>
+              <article className="md:text-base text-xs font-inter font-bold">
+                My Account
+              </article>
               <div className="relative w-full md:space-y-2 space-y-1">
-                {
-                  ["Profile", "Watchlist", "My Cart", "Settings"]?.map((link, idx) => {
+                {[{label : "Profile", url : "/profile"}, {label : "My Cart", url : null , action : setOpenCartModel}, {label : "Ranking", url : "/xp/ranks"}]?.map(
+                  (link, idx) => {
                     return (
-                      <article key={idx} className="md:text-xs text-[10px] font-medium font-inter">{link}</article>
-                    )
-                  })
-                }
-              </div>
-            </div>
-            <div className="relative md:w-[150px] w-full space-y-3">
-              <article className="md:text-base text-xs font-inter font-bold">Stats</article>
-              <div className="relative w-full md:space-y-2 space-y-1">
-                {
-                  ["Ranking", "Activity"]?.map((link, idx) => {
-                    return (
-                      <article key={idx} className="md:text-xs text-[10px] font-medium font-inter">{link}</article>
-                    )
-                  })
-                }
-              </div>
-            </div>
-          </div>
-          <div className="relative  flex-col flex justify-start items-center ">
-            <div className="relative  space-y-3">
-              <article className="md:text-base text-xs font-inter font-bold">Company</article>
-              <div className="relative w-full md:space-y-2 space-y-1">
-                {
-                  ["About","Blog", "Support", "FAQs", "Terms & Coditions" ]?.map((link, idx) => {
-                    return (
-                      <article key={idx} className="md:text-xs text-[10px] font-medium font-inter">{link}</article>
-                    )
-                  })
-                }
+                      <article
+                        key={idx}
+                        className="md:text-xs text-[10px] font-medium font-inter"
+                        onClick={() => link.url ? (isLoggedIn ? router.push(link.url) : setOpenLoginModel()) : link.action()}
+                      >
+                        {link.label}
+                      </article>
+                    );
+                  }
+                )}
               </div>
             </div>
            
           </div>
+          <div className="relative  flex-col flex justify-start items-center ">
+            <div className="relative  space-y-3">
+              <article className="md:text-base text-xs font-inter font-bold">
+                Company
+              </article>
+              <div className="relative w-full md:space-y-2 space-y-1">
+                {[
+                  { label: "About", url: "/about" },
+                  { label: "Blog", url: "/blog" },
+                  { label: "Support", url: "mailTo:team@mvpz.io" },
+                  { label: "FAQs", url: "/faqs" },
+                  { label: "Terms & Coditions", url: "/terms" },
+                ]?.map((link, idx) => {
+                  return (
+                    <article
+                      key={idx}
+                      className="md:text-xs text-[10px] font-medium font-inter"
+                      onClick={() => link.url.includes("mailTo") ? window.open(link.url, "_blank") : router.push(link.url)}
+                    >
+                      {link.label}
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div className="mt-20">
-      <Copyright />
+        <Copyright />
       </div>
     </div>
   );

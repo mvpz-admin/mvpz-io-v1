@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect } from "react";
 import { useRouter } from "next/router";
 import HeaderV1 from "../Components/Widgets/Header";
 import {
+  useEditProfileStore,
   useGlobalPageLoading,
   useLoginProcessStore,
   usePostTipStore,
@@ -18,6 +19,7 @@ import CardCreator from "../Components/Cards/CardCreator";
 import ProfileWaitlisted from "../Components/Signin/ProfileWaitlisted";
 import { callAPI } from "../../lib/utils";
 import NotificationsModel from "../Components/Widgets/NotificationsModel";
+import EditProfile from "../Components/profile/EditProfile";
 
 type Props = {
   children: ReactNode;
@@ -30,6 +32,7 @@ const Layout: React.FC<Props> = (props) => {
   const { pageLoading } = useGlobalPageLoading((state) => state);
   const { user, setUser } = useAuthStore((state) => state);
   const { openTipModel } = usePostTipStore((state) => state);
+  const { openEditProfile } = useEditProfileStore((state) => state);
 
   const handleUpdatesOnWaitlist = async () => {
     let response = await callAPI({
@@ -133,6 +136,9 @@ const Layout: React.FC<Props> = (props) => {
       <NotificationsModel />
       {/* Fanzone Post Tip Model */}
       {openTipModel && <PostTipModel />}
+
+      {/* Edit Profile */}
+      {openEditProfile && <EditProfile />}
       {/* Request A Card */}
       {user?.role == "Athlete" &&
         user?.isProfileCompleted &&

@@ -63,12 +63,7 @@ const Index = () => {
               <FaChevronLeft size={14} />
               <span className="text-[14px]">Back</span>
             </div>
-            <div
-              className="bg-white text-primary border-white border border-opacity-5 rounded-full px-4 py-2 text-xs flex justify-start items-center gap-2 cursor-pointer"
-              onClick={() => router.push("/auth/signin")}
-            >
-              <span>Login</span>
-            </div>
+           
           </div>
           <div className="w-full flex-1" />
           <div className="relative w-full space-y-4 mb-10">

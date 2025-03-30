@@ -4,35 +4,39 @@ import { BsFillPatchCheckFill } from "react-icons/bs";
 import { formatNumber } from "../../../../utils/global/formating";
 import { IoIdCard } from "react-icons/io5";
 import { IoMdMore } from "react-icons/io";
-import { FaCheck, FaInstagram, FaTiktok } from "react-icons/fa";
+import { FaCheck, FaEdit, FaInstagram, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import Skeleton from "../../../Atoms/Others/Skeleton";
 import { callAPI } from "../../../../lib/utils";
 import { useAuthStore } from "../../../../store/useAuthStore";
 import { useRouter } from "next/router";
+import TextFeild from "../../../Atoms/Inputs/TextFeild";
+import TextAreaFeild from "../../../Atoms/Inputs/TextareaFeild";
+import { useEditProfileStore } from "../../../../store/useGlobalStore";
 
 const UserAccountDetails = ({ profileData, profileDataLoading }) => {
   const [showMore, setShowMore] = useState(false);
-   const [following, setFollowing] = useState(null);
-    const { user } = useAuthStore((state) => state);
-    const router = useRouter()
-  
-    const handleToggleFollow = async () => {
+  const [following, setFollowing] = useState(null);
+  const { user } = useAuthStore((state) => state);
+  const router = useRouter();
+  const { setOpenEditProfile } = useEditProfileStore((state) => state);
+
+  const handleToggleFollow = async () => {
+    setFollowing(!following);
+    const response = await callAPI({
+      endpoint: `/v1/profiles/user/${profileData?.username}/follow`,
+      method: "PUT",
+    });
+    if (!response.success) {
       setFollowing(!following);
-      const response = await callAPI({
-        endpoint: `/v1/profiles/user/${profileData?.username}/follow`,
-        method: "PUT",
-      });
-      if (!response.success) {
-        setFollowing(!following);
-      }
-    };
-  
-    useEffect(() => {
-      if (profileData) {
-        setFollowing(profileData?.userFollowing);
-      }
-    }, [profileData]);
+    }
+  };
+
+  useEffect(() => {
+    if (profileData) {
+      setFollowing(profileData?.userFollowing);
+    }
+  }, [profileData]);
   return (
     <>
       {/* container */}
@@ -124,33 +128,34 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
           <div className="relative md:w-auto w-full flex md:justify-end justify-between md:items-center pb-8 ">
             {/* social media  */}
             {user?.username !== profileData?.username ? (
-                <>
-                  {profileDataLoading ? (
-                    <Skeleton
-                      className={`bg-secondary  w-[100px] h-[40px] rounded-md mb-1`}
-                    />
-                  ) : (
-                    <div
-                      className="flex justify-center items-center  gap-2 px-3 py-2 border border-white border-opacity-10 rounded-lg backdrop-blur-md font-inter font-bold md:text-base text-sm cursor-pointer"
-                      onClick={handleToggleFollow}
-                    >
-                      {following ? (
-                        <>
-                          <FaCheck size={14} /> Following
-                        </>
-                      ) : (
-                        "Follow"
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : 
+              <>
+                {profileDataLoading ? (
+                  <Skeleton
+                    className={`bg-secondary  w-[100px] h-[40px] rounded-md mb-1`}
+                  />
+                ) : (
+                  <div
+                    className="flex justify-center items-center  gap-2 px-3 py-2 border border-white border-opacity-10 rounded-lg backdrop-blur-md font-inter font-bold md:text-base text-sm cursor-pointer"
+                    onClick={handleToggleFollow}
+                  >
+                    {following ? (
+                      <>
+                        <FaCheck size={14} /> Following
+                      </>
+                    ) : (
+                      "Follow"
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
               <div
-                      className="flex justify-center items-center  gap-2 px-3 py-2 border border-white border-opacity-20 rounded-lg backdrop-blur-md font-inter font-bold md:text-base text-sm cursor-pointer"
-                      
-                    >
-                      Edit Profile
-                    </div>}
+                className="flex justify-center items-center  gap-2 px-3 py-2 border border-white border-opacity-20 rounded-lg backdrop-blur-md font-inter font-bold md:text-base text-sm cursor-pointer"
+                onClick={() => setOpenEditProfile()}
+              >
+                Edit Profile
+              </div>
+            )}
             <div className="md:block hidden w-[1px] h-[25px] bg-white bg-opacity-40 mx-8" />
             {/* more optios */}
             <div className="flex justify-end items-center gap-5">
@@ -168,7 +173,12 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
                 </>
               ) : (
                 <>
-                  <IoIdCard size={22} onClick={() => router.push(`/p/${profileData?.username}/profilecard`)}/>
+                  <IoIdCard
+                    size={22}
+                    onClick={() =>
+                      router.push(`/p/${profileData?.username}/profilecard`)
+                    }
+                  />
                   <IoMdMore size={22} />
                 </>
               )}
@@ -228,6 +238,7 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
           </div>
         )}
       </div>
+     
     </>
   );
 };

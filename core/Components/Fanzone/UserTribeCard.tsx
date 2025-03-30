@@ -53,8 +53,8 @@ const UserTribeCard = ({ tribe, loading }) => {
                   className={`bg-secondary w-[250px] h-[18px] rounded-md mb-1`}
                 />
               ) : (
-                <div className="flex  justify-start items-center">
-                  <article className="text-2xl font-inter font-semibold">
+                <div className="flex  justify-start items-center mb-2">
+                  <article className="text-base font-inter font-semibold">
                     {tribe?.tribeName}
                   </article>
                   {tribe?.isVerified && (

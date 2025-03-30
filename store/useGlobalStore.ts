@@ -156,6 +156,20 @@ export const useLoginProcessStore = create<loginProcess>()((set) => ({
 
 // Global Login Process //
 
+// Global Edit Profile //
+
+type editProfile = {
+  openEditProfile: boolean;
+  setOpenEditProfile: () => void;
+  setCloseEditProfile: () => void;
+};
+
+export const useEditProfileStore = create<editProfile>()((set) => ({
+  openEditProfile: false,
+  setOpenEditProfile: () => set({ openEditProfile: true }),
+  setCloseEditProfile: () => set({ openEditProfile: false }),
+}));
+
 // Global Search Process //
 
 type SearchItem = {
