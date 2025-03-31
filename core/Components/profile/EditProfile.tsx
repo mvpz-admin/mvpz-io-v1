@@ -105,14 +105,14 @@ const EditProfile = () => {
     formData.append('name', profileData.name);
     formData.append('bio', profileData.bio);
 
-    const response = await callAPI({
-      endpoint: `/v1/profiles/${user?.role === "Athlete" ? "athlete" : "user"}/${user?.username}`,
-      method: "PUT",
-      body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // const response = await callAPI({
+    //   endpoint: `/v1/profiles/${user?.role === "Athlete" ? "athlete" : "user"}/${user?.username}`,
+    //   method: "PUT",
+    //   body: formData,
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data',
+    //   },
+    // });
     setLoading(false);
   }
 

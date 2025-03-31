@@ -9,6 +9,8 @@ import { Autoplay } from "swiper/modules";
 import Skeleton from "../../Atoms/Others/Skeleton";
 import { extractPostDetails } from "../../../utils/global/global";
 import { BsFillPatchCheckFill } from "react-icons/bs";
+import { FaAngleRight, FaArrowRight } from "react-icons/fa";
+import Tooltip from "../../Atoms/Others/Tooltip";
 import { useRouter } from "next/router";
 
 const ShoutsHightlightSection = ({ shout, loading }) => {
@@ -104,6 +106,8 @@ const ShoutsHightlightSection = ({ shout, loading }) => {
 };
 
 const CustomizeShouts = ({ loading, data }) => {
+  const router = useRouter();
+  const {tribeId} = router.query;
   return (
     <div className="relative w-full  ">
       <Swiper
@@ -157,6 +161,20 @@ const CustomizeShouts = ({ loading, data }) => {
                 </SwiperSlide>
               );
             })}
+            {
+              !loading && data?.length > 0 && (
+                <SwiperSlide >
+                  <div className=" md:h-[175px] h-[150px]  w-[100px] flex justify-center items-center">
+                  <div className="w-[50px] h-[50px] bg-white bg-opacity-20 rounded-full flex justify-center items-center cursor-pointer" onClick={() => router.push(`/t/${tribeId}/community/shouts`)}>
+                    <article className="text-xs font-inter font-semibold">
+                      <FaArrowRight />
+                    </article>
+                  </div>
+
+                  </div>
+                </SwiperSlide>
+              )
+            }
       </Swiper>
     </div>
   );

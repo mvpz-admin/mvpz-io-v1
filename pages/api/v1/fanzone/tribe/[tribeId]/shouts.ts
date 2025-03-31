@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { BB_BASE_URL } from "../../../../../utils/global/global";
-import prisma from "../../../../../lib/prisma";
-import { formateDateTimeOn } from "../../../../../utils/global/formating";
-import { isLoginUser } from "../../../../../lib/global/getUserFromToken";
-import { methodGuard } from "../../../../../utils/global/methodNotAllowed";
+import { BB_BASE_URL } from "../../../../../../utils/global/global";
+import prisma from "../../../../../../lib/prisma";
+import { formateDateTimeOn } from "../../../../../../utils/global/formating";
+import { isLoginUser } from "../../../../../../lib/global/getUserFromToken";
+import { methodGuard } from "../../../../../../utils/global/methodNotAllowed";
 
 const getEventImage = ({ image }) => {
   if (!image) return null;
@@ -40,7 +40,6 @@ const Section1Shouts = async ({ user, tribeId }) => {
       orderBy: {
         createdAt: "desc",
       },
-      take: 10,
     })
     .then((res) =>
       res.map((data) => ({
@@ -56,85 +55,6 @@ const Section1Shouts = async ({ user, tribeId }) => {
     );
 
   return shouts;
-};
-
-const Section2Posts = async ({ user, tribeId }) => {
-  return prisma.tribePost
-    .findMany({
-      where: {
-        tribeId,
-      },
-      select: {
-        id: true,
-        thumbnail: true,
-        message: true,
-        postedBy: {
-          select: {
-            id: true,
-            profileImage: true,
-            name: true,
-            username: true,
-            isVerified: true,
-            following: {
-              where: {
-                followerId: user?.id,
-              },
-            },
-          },
-        },
-        bolts: { where: { userId: user?.id } },
-        claps: { where: { userId: user?.id } },
-        clovers: { where: { userId: user?.id } },
-        likes: { where: { userId: user?.id } },
-        _count: {
-          select: {
-            comments: true,
-            bolts: true,
-            claps: true,
-            clovers: true,
-            likes: true,
-          },
-        },
-        createdAt: true,
-      },
-      orderBy: { createdAt: "desc" },
-      // take : 5
-    })
-    .then(async (posts) => {
-      return posts.map((post) => ({
-        ...post,
-        postedBy: {
-          ...post.postedBy,
-          profileImage: getEventImage({ image: post.postedBy.profileImage }),
-          following: post.postedBy.following?.length > 0,
-        },
-        reactions: {
-          hearts: post?._count?.likes,
-          claps: post?._count?.claps,
-          fires: post?._count?.bolts,
-          good_luck: post?._count?.clovers,
-          totalReactions:
-            post._count.bolts +
-            post._count.claps +
-            post._count.clovers +
-            post._count.likes,
-        },
-        upload_on: formateDateTimeOn({ date: post.createdAt }),
-        isLiked: (post.bolts.length > 0 && {
-          isLiked: true,
-          likedType: "fires",
-        }) ||
-          (post.claps.length > 0 && { isLiked: true, likedType: "claps" }) ||
-          (post.clovers.length > 0 && {
-            isLiked: true,
-            likedType: "good_luck",
-          }) ||
-          (post.likes.length > 0 && { isLiked: true, likedType: "hearts" }) || {
-            isLiked: false,
-            likedType: null,
-          },
-      }));
-    });
 };
 
 const Sections3Tribes = async ({ user }) => {
@@ -257,9 +177,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let [shouts, posts, tribes] = await Promise.all([
+    let [shouts, tribes] = await Promise.all([
       Section1Shouts({ user, tribeId: getTribe.id }),
-      Section2Posts({ user, tribeId: getTribe.id }),
       Sections3Tribes({ user }),
     ]);
 
@@ -267,7 +186,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       success: true,
       data: {
         shouts,
-        posts,
         tribes,
       },
       message: `Fanzone Loaded SuccessFully`,

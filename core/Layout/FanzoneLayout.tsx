@@ -335,7 +335,7 @@ export default function FanzoneLayout({ children }) {
         <LinksSections list={mainLinks} />
         {/* <LinksSections title={"Explore"} list={exploreLinks} /> */}
         {isLoggedIn ? (
-          <TribeLinksSections
+          myTribes?.length > 0 && <TribeLinksSections
             title={"My Tribes"}
             list={myTribes}
             loading={tribesLoading}
@@ -348,7 +348,7 @@ export default function FanzoneLayout({ children }) {
           />
         )}
         {isLoggedIn ? (
-          <AthleteLinksSections
+        athletes?.length > 0 &&  <AthleteLinksSections
             title={"Followed Athletes"}
             list={athletes}
             loading={tribesLoading}

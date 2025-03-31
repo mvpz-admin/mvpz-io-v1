@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from "react";
-import FanzoneLayout from "../../core/Layout/FanzoneLayout";
 import Image from "next/image";
-import CustomizeShouts from "../../core/Components/Fanzone/CustomizeShouts";
-import Post from "../../core/Components/Fanzone/Post";
 import { BsFillPatchCheckFill } from "react-icons/bs";
 import { useRouter } from "next/router";
-import { callAPI } from "../../lib/utils";
 import { Skeleton } from "@mantine/core";
-import WhatsHapping from "../../core/Components/Fanzone/WhatsHapping";
-import { useFeedStore } from "../../store/useOtherStore";
 import { FaArrowLeft } from "react-icons/fa";
+import { callAPI } from "../../../../../lib/utils";
+import FanzoneLayout from "../../../../../core/Layout/FanzoneLayout";
+import { useFeedStore } from "../../../../../store/useOtherStore";
+import Post from "../../../../../core/Components/Fanzone/Post";
 
 const Fanzone = () => {
   const router = useRouter();
+  const {tribeId} = router.query;
   const [pageData, setPageData] = useState<any>();
   const [pageDataLoading, setPageDataLoading] = useState(true);
   const [feedDataLoading, setFeedDataLoading] = useState(false);
@@ -22,7 +21,7 @@ const Fanzone = () => {
   const [bottomReached, setBottomReached] = useState(false);
 
   const handleBack = () => {
-    router.push("/fanzone");
+    router.back();
   };
 
   const handleFetchPageData = async () => {
@@ -30,7 +29,7 @@ const Fanzone = () => {
     setPageDataLoading(true);
     try {
       let response = await callAPI({
-        endpoint: "/v1/fanzone/home",
+        endpoint: `/v1/fanzone/tribe/${tribeId}/shouts`,
       });
 
       setPageData(response?.data);

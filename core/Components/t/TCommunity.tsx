@@ -37,7 +37,7 @@ const TCommunity = ({ tribeId }) => {
   }, [tribeId]);
   return (
     <div className="relativew-full h-full z-5 backdrop-blur-3xl lg:px-10 md:px-5 px-2   overflow-y-auto space-y-10 ">
-      <CustomizeShouts loading={pageDataLoading} data={pageData?.shouts} />
+      <CustomizeShouts loading={pageDataLoading} data={pageData?.shouts}  />
       <div className="sticky top-0 w-full flex gap-10 ">
         <div className="w-full lg:flex-[0.6]  h-full space-y-5 pb-10">
           <Feed
