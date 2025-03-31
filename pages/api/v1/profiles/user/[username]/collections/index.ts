@@ -67,14 +67,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }
         },
       },
-    }).then((res) => res?.purchaseCards?.map((card) => ({
-      id : card?.id,
-      title : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.title,
-      ver : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.ver,
-      avatar : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.avatar,
-      cardImage : getEventImage({ image: card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.cardNFTImage }),
-      count : card?.majorEnhancementPurchases?.length
-    })))
+    }).then((res) =>{
+
+      
+      return  res?.purchaseCards?.map((card) => ({
+        id : card?.id,
+        title : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.title,
+        ver : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.ver,
+        avatar : card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.avatar,
+        cardImage : getEventImage({ image: card?.majorEnhancementPurchases[0]?.nftMajorEnhancement?.cardNFTImage }),
+        count : card?.majorEnhancementPurchases?.length
+      }))
+    })
 
     if (!userWithCollections) {
       return res.status(404).json({

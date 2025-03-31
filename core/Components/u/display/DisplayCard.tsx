@@ -8,16 +8,16 @@ export const DisplayCard = ({ card, loading, type }) => {
   const router = useRouter();
   const username = router.query.username;
   return (
-    card.cardImage && <div
+    <div
       className="relative w-full h-[375px] bg-secondary rounded-lg overflow-hidden border border-white border-opacity-10"
       onClick={() =>
-        router.push(`/a/${username}/collected/${card?.id}`)
+      !loading && router.push(`/a/${username}/collected/${card?.id}`)
       }
     >
       {/* bgImage */}
       {!loading && (
         <div className="absolute top-0 left-0 w-full h-full">
-          {card && (
+          {card.cardImage && (
             <Image
               src={card.cardImage}
               alt="bgimage"

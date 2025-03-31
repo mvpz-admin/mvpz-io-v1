@@ -6,7 +6,8 @@
     "dev": "next dev ",
     "build": "next build",
     "start": "next start",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "download-folder": "ts-node scripts/downloadFolder.ts"
   },
   "dependencies": {
     "@blockfrost/blockfrost-js": "^5.5.0",

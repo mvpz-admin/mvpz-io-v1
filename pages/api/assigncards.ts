@@ -16,18 +16,24 @@ export default async function handler(
       },
       include: {
         majorEnhancementPurchases: true,
-
+        nftEntity : {
+          where : {
+            type : {
+              in : ["Team", "Championship", "Activity"]
+            }
+          }
+        }
       },
     });
 
-    console.log({
-      purchaseCount : purchase.length
-    });
+   
     
 
     await Promise.all(
       purchase.map(async (purchase) => {
 
+
+        
 
 
         if (
@@ -40,7 +46,7 @@ export default async function handler(
             },
           });
 
-          if(nftEntity?.type !== "Athlete") {
+          if(nftEntity?.type == "Athlete") {
             return;
           }
 
@@ -71,6 +77,9 @@ export default async function handler(
             console.log("majorEnhancement not found", nftEntity?.id);
             return;
           };
+
+          console.log("All Good");
+          
 
         let createPurchase = await prisma.nFTMajorEnhancementPurchase.create({
             data: {
