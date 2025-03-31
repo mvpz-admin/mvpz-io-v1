@@ -27,7 +27,8 @@ export const calculateAge = (dob: Date): number => {
   return age;
 };
 
-export function formatDOB({ dob }: { dob: Date }): string {
+export function formatDOB({ dob }: { dob: Date | null }): string | null {
+  if (!dob) return null;
   return dob.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

@@ -170,7 +170,7 @@ const Footer = () => {
                   return (
                     <article
                       key={idx}
-                      className="md:text-xs text-[10px] font-medium font-inter"
+                      className="md:text-xs text-[10px] font-medium font-inter cursor-pointer"
                       onClick={() => link.url.includes("mailTo") ? window.open(link.url, "_blank") : router.push(link.url)}
                     >
                       {link.label}

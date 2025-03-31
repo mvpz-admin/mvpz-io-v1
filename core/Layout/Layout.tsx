@@ -66,6 +66,7 @@ const Layout: React.FC<Props> = (props) => {
     "/developmet",
     "/mvpz-market",
     "/mvpz-market/card/[cardId]",
+    "/about",
     "/terms",
     "/cookies",
     "/policy",

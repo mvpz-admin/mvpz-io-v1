@@ -60,8 +60,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ...data,
         name : formatName({fullName : data?.name}),
         tpProfileImage : getEventImage({image : data?.tpProfileImage}),
-        age : calculateAge(data?.dob),
-        dob : formatDOB({dob : data?.dob}),
+        age : data?.dob ? calculateAge(data.dob) : null,
+        dob : data?.dob ? formatDOB({dob : data?.dob}) : null,
         currentTeam : athleteTribes[0]?.tribe?.tribeShortName,
         theme : {
           color : athleteTribes[0]?.tribe?.organisation?.primaryColorHex,
