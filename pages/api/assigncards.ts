@@ -11,13 +11,25 @@ export default async function handler(
     }
 
     let purchase = await prisma.nFTPurchaseCard.findMany({
+      where : {
+        status: "ASSIGNED"
+      },
       include: {
         majorEnhancementPurchases: true,
+
       },
     });
 
+    console.log({
+      purchaseCount : purchase.length
+    });
+    
+
     await Promise.all(
       purchase.map(async (purchase) => {
+
+
+
         if (
           purchase.majorEnhancementPurchases.length == 0
         ) {
@@ -60,13 +72,19 @@ export default async function handler(
             return;
           };
 
-          await prisma.nFTMajorEnhancementPurchase.create({
+        let createPurchase = await prisma.nFTMajorEnhancementPurchase.create({
             data: {
               avatarId: avatar?.id,
               nftMajorEnhancementId: majorEnhancement?.id ,
               purchaseId: purchase.id,
             },
           });
+
+          if(createPurchase){
+            console.log("Purchase created successfully", purchase.id);
+          }else{
+            console.log("Purchase creation failed", purchase.id);
+          }
         }
       })
     );

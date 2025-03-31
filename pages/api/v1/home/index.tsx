@@ -5,7 +5,7 @@ import { BB_BASE_URL } from "../../../../utils/global/global";
 import { isLoginUser } from "../../../../lib/global/getUserFromToken";
 
 const getEventImage = ({ image }) => {
-  if (!image) return null;
+  if (!image) return "";
   if (image.includes("https://")) {
     return image;
   } else {
@@ -16,6 +16,12 @@ const getEventImage = ({ image }) => {
 const Section1EnhCards = async () => {
   let enh = await prisma.nFTMajorEnhancement
     .findMany({
+      where : {
+        isBaseCard : true,
+        nftEntity : {
+          type : "Athlete"
+        }
+      },
       select: {
         id: true,
         avatarsId: true,
@@ -97,7 +103,7 @@ const Section2Fanzone = async ({ user }) => {
         postedBy: {
           ...data.postedBy,
           profileImage: getEventImage({
-            image: data.postedBy.profileImage,
+            image: data?.postedBy?.profileImage,
           }),
         },
       }))
@@ -386,15 +392,15 @@ const Section4Cards = async () => {
         ...data,
         price: data.price || 20,
         cardNFTImage: getEventImage({ image: data.cardNFTImage }),
-        nftEntity: {
+        nftEntity: data.nftEntity ? {
           ...data.nftEntity,
-          athlete: {
+          athlete: data.nftEntity.athlete ? {
             ...data.nftEntity.athlete,
             profileImage: getEventImage({
               image: data.nftEntity.athlete.profileImage,
             }),
-          },
-        },
+          } : null,
+        } : null,
       }))
     );
 
