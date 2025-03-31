@@ -124,12 +124,10 @@ const getUsers = async ({ key }) => {
   const searchedUser = await prisma.user
     .findMany({
       where: {
-        role: "User",
         OR: [
           { name: { contains: key, mode: "insensitive" } },
           { username: { contains: key, mode: "insensitive" } },
         ],
-        AND: [{ isMvpzAccount: { not: true } }],
       },
       select: {
         id: true,
@@ -137,6 +135,7 @@ const getUsers = async ({ key }) => {
         username: true,
         profileImage: true,
         isVerified: true,
+        role: true,
         _count: {
           select: {
             followers: true,
@@ -157,7 +156,7 @@ const getUsers = async ({ key }) => {
           isVerified: data?.isVerified,
           subtitle1: data?.username,
           subtitle2: `${formatNumber(data?._count?.followers)} Followers`,
-          url: `/p/${data.username}`,
+          url: data.role === "Athlete" ? `/a/${data.username}` : `/p/${data.username}`,
         };
       })
     );

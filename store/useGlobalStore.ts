@@ -170,6 +170,22 @@ export const useEditProfileStore = create<editProfile>()((set) => ({
   setCloseEditProfile: () => set({ openEditProfile: false }),
 }));
 
+// Global Edit Profile //
+
+type globalMenu = {
+  openGlobalMenu: boolean;
+  setOpenGlobalMenu: () => void;
+  setCloseGlobalMenu: () => void;
+};
+
+export const useGlobalMenuStore = create<globalMenu>()((set) => ({
+  openGlobalMenu: false,
+  setOpenGlobalMenu: () => set({ openGlobalMenu: true }),
+  setCloseGlobalMenu: () => set({ openGlobalMenu: false }),
+}));
+
+// Global Edit Profile //
+
 // Global Search Process //
 
 type SearchItem = {

@@ -20,6 +20,7 @@ import ProfileWaitlisted from "../Components/Signin/ProfileWaitlisted";
 import { callAPI } from "../../lib/utils";
 import NotificationsModel from "../Components/Widgets/NotificationsModel";
 import EditProfile from "../Components/profile/EditProfile";
+import SidebarMenu from "../Components/Widgets/SidebarMenu";
 
 type Props = {
   children: ReactNode;
@@ -128,6 +129,8 @@ const Layout: React.FC<Props> = (props) => {
         </>
       )}
 
+      {/* Sidebar Menu */}
+      <SidebarMenu />
       {/* Cart Model */}
       <CartModel />
       {/* Buy Model */}

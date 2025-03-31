@@ -13,6 +13,8 @@ import { useRouter } from "next/router";
 import TextFeild from "../../../Atoms/Inputs/TextFeild";
 import TextAreaFeild from "../../../Atoms/Inputs/TextareaFeild";
 import { useEditProfileStore } from "../../../../store/useGlobalStore";
+import ShareModel from "../../Widgets/ShareModel";
+import MenuOptions from "../../../Atoms/Others/MenuOption";
 
 const UserAccountDetails = ({ profileData, profileDataLoading }) => {
   const [showMore, setShowMore] = useState(false);
@@ -20,6 +22,7 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
   const { user } = useAuthStore((state) => state);
   const router = useRouter();
   const { setOpenEditProfile } = useEditProfileStore((state) => state);
+  const [isShareModelOpen, setIsShareModelOpen] = useState(false);
 
   const handleToggleFollow = async () => {
     setFollowing(!following);
@@ -179,7 +182,18 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
                       router.push(`/p/${profileData?.username}/profilecard`)
                     }
                   />
+                  <MenuOptions
+                    position="left"
+                      options={[
+                        {
+                          label: "Share",
+                          id: "SHARE",
+                        },
+                      ]}
+                      onSelect={() => setIsShareModelOpen(true)}
+                    >
                   <IoMdMore size={22} />
+                  </MenuOptions>
                 </>
               )}
             </div>
@@ -238,7 +252,13 @@ const UserAccountDetails = ({ profileData, profileDataLoading }) => {
           </div>
         )}
       </div>
-     
+      {isShareModelOpen && (
+          <ShareModel
+            title="Share Profile"
+            pathname={`/u/${profileData?.username}`}
+            closeModel={() => setIsShareModelOpen(false)}
+          />
+        )}
     </>
   );
 };

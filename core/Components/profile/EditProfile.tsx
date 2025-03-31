@@ -4,12 +4,15 @@ import { FaEdit } from "react-icons/fa";
 import TextFeild from "../../Atoms/Inputs/TextFeild";
 import TextAreaFeild from "../../Atoms/Inputs/TextareaFeild";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { callAPI } from "../../../lib/utils";
+import { callAPI, uploadImageToBackblaze } from "../../../lib/utils";
 import { useEditProfileStore } from "../../../store/useGlobalStore";
 import LineLoadingEffect from "../../Atoms/Loading/LineLoading";
+import { BB_BASE_URL } from "../../../utils/global/global";
+import { Notification } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 const EditProfile = () => {
-  const { user } = useAuthStore((state) => state);
+  const { user, setUser } = useAuthStore((state) => state);
   const { setCloseEditProfile } = useEditProfileStore((state) => state);
   const [profileData, setProfileData] = useState({
     username: "",
@@ -22,8 +25,12 @@ const EditProfile = () => {
     username: "",
     name: "",
   });
-  const [selectedBannerImage, setSelectedBannerImage] = useState<File | null>(null);
-  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [selectedBannerImage, setSelectedBannerImage] = useState<File | null>(
+    null
+  );
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(
+    null
+  );
   const [bannerPreview, setBannerPreview] = useState<string>("");
   const [profilePreview, setProfilePreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -89,45 +96,119 @@ const EditProfile = () => {
     }
   };
 
+  const uploadImage = async (
+    file: File,
+    path: string
+  ): Promise<string | null> => {
+    try {
+      // Request a new upload URL and authorization token for each image upload
+      const backblazeImage = await callAPI({
+        endpoint: "/v1/global/image/uploadBackBlaze",
+        method: "GET",
+      });
+
+      if (backblazeImage.uploadUrl && backblazeImage.authorizationToken) {
+        const uploadUrl = backblazeImage.uploadUrl;
+        const authToken = backblazeImage.authorizationToken;
+
+        // Upload the image using the provided URL and token
+        const response = await uploadImageToBackblaze(
+          file,
+          path,
+          uploadUrl,
+          authToken
+        );
+        if (response) {
+          // Return the public URL of the uploaded image
+          return `${BB_BASE_URL}/${path}`;
+        }
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    }
+    return null;
+  };
+
   const handleSaveChanges = async () => {
     if (!validateForm()) {
       return;
     }
     setLoading(true);
-    const formData = new FormData();
+    let bannerImageUrl = null;
     if (selectedBannerImage) {
-      formData.append('bannerImage', selectedBannerImage);
+      bannerImageUrl = await uploadImage(
+        selectedBannerImage,
+        `user-profiles/${process.env.NEXT_PUBLIC_BACKBLAZE_TYPE}/${user?.username}/banner.png`
+      );
     }
+    let profileImageUrl = null;
     if (selectedProfileImage) {
-      formData.append('profileImage', selectedProfileImage);
+      profileImageUrl = await uploadImage(
+        selectedProfileImage,
+        `user-profiles/${process.env.NEXT_PUBLIC_BACKBLAZE_TYPE}/${user?.username}/profile.png`
+      );
     }
-    formData.append('username', profileData.username);
-    formData.append('name', profileData.name);
-    formData.append('bio', profileData.bio);
 
-    // const response = await callAPI({
-    //   endpoint: `/v1/profiles/${user?.role === "Athlete" ? "athlete" : "user"}/${user?.username}`,
-    //   method: "PUT",
-    //   body: formData,
-    //   headers: {
-    //     'Content-Type': 'multipart/form-data',
-    //   },
-    // });
+    let body: any = {
+      username: profileData.username,
+      name: profileData.name,
+      bio: profileData.bio,
+    };
+
+    if (bannerImageUrl) {
+      body = {
+        ...body,
+        bannerImage: bannerImageUrl,
+      };
+    }
+    if (profileImageUrl) {
+      body.profileImage = profileImageUrl;
+    }
+
+    let response = await callAPI({
+      endpoint: `/v1/profiles/${user?.username}/update`,
+      method: "PUT",
+      body: body,
+    });
+
+    if (!response.success) {
+      notifications.show({
+        title: "Error",
+        message: response.error,
+        color: "red",
+      });
+
+      return false;
+    }
+
+    setUser({
+      ...user,
+      ...response.data.user,
+    });
+
     setLoading(false);
-  }
+  };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000] " onClick={() => setCloseEditProfile()}>
-      <div className="relative md:w-[500px] w-full md:h-[80vh] h-full bg-secondary rounded-xl overflow-y-auto scroller-hidden " onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000] "
+      onClick={() => setCloseEditProfile()}
+    >
+      <div
+        className="relative md:w-[500px] w-full md:h-[80vh] h-full bg-secondary rounded-xl overflow-y-auto scroller-hidden "
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* banner image */}
         <div className="relative w-full h-[200px] rounded-xl ">
           <>
-            {bannerPreview && <Image
-              src={bannerPreview}
-              alt="banner"
-              fill
-              className="object-cover rounded-xl brightness-50"
-            />}
+            {bannerPreview && (
+              <Image
+                src={bannerPreview}
+                alt="banner"
+                fill
+                className="object-cover rounded-xl brightness-50"
+              />
+            )}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
               <label className="flex justify-center items-center gap-2 cursor-pointer">
                 <FaEdit size={20} />
@@ -145,12 +226,14 @@ const EditProfile = () => {
         <div className="relative w-full p-4 -mt-[75px] ">
           <div className="w-[150px] h-[150px] bg-secondary rounded-full p-2 mb-5">
             <div className="relative w-full h-full bg-black rounded-full">
-              {profilePreview && <Image
-                src={profilePreview}
-                alt="profile"
-                fill
-                className="object-cover rounded-full brightness-50"
-              />}
+              {profilePreview && (
+                <Image
+                  src={profilePreview}
+                  alt="profile"
+                  fill
+                  className="object-cover rounded-full brightness-50"
+                />
+              )}
               {/* edit */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
                 <label className="flex justify-center items-center gap-2 cursor-pointer">
@@ -173,6 +256,7 @@ const EditProfile = () => {
               <TextFeild
                 placeholder="Enter Your Username"
                 inputStyle={"text-[12px]"}
+                maxLength={20}
                 value={profileData?.username}
                 onChange={(e) => {
                   setProfileData({ ...profileData, username: e.target.value });
@@ -191,6 +275,7 @@ const EditProfile = () => {
               <TextFeild
                 placeholder="Enter Your Full Name"
                 inputStyle={"text-[12px]"}
+                maxLength={20}
                 value={profileData?.name}
                 onChange={(e) => {
                   setProfileData({ ...profileData, name: e.target.value });
@@ -207,14 +292,24 @@ const EditProfile = () => {
                 placeholder="Enter Your Bio"
                 inputStyle={"text-[12px] resize-none h-[100px]"}
                 value={profileData?.bio}
-                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                onChange={(e) =>
+                  setProfileData({ ...profileData, bio: e.target.value })
+                }
               />
             </div>
           </div>
         </div>
         <div className="absolute bottom-0 w-full p-4 flex justify-end items-center gap-2">
+        <div>
+            <button
+              onClick={() => !loading && setCloseEditProfile()}
+              className="w-full bg-secondary text-white px-4 py-3 rounded-md font-inter font-bold text-[10px]"
+            >
+              Cancel
+            </button>
+          </div>
           <div>
-            <button 
+            <button
               onClick={() => !loading && handleSaveChanges()}
               className="w-full bg-primary text-white px-4 py-3 rounded-md font-inter font-bold text-[10px]"
             >
@@ -223,9 +318,11 @@ const EditProfile = () => {
           </div>
         </div>
         {/* lineLoading */}
-       {loading && <div className="absolute top-0 left-0 w-full">
-                <LineLoadingEffect />
-            </div>}
+        {loading && (
+          <div className="absolute top-0 left-0 w-full">
+            <LineLoadingEffect />
+          </div>
+        )}
       </div>
     </div>
   );

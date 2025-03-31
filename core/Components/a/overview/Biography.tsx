@@ -6,7 +6,7 @@ const Biography = ({profileData, profileDataLoading}) => {
          <div
            dangerouslySetInnerHTML={{
              __html: 
-             profileData?.biography,
+             profileData?.biography || profileData?.bio,
            }}
            className="font-inter text-[12px]"
          />

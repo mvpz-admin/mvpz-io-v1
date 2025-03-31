@@ -3,6 +3,7 @@ import ProductSale from "../../core/Components/apparel/ProductSale";
 import { callAPI } from "../../lib/utils";
 import { useRouter } from "next/router";
 import ApparelProductCardV1 from "../../core/Components/apparel/ApparelProductCardV1";
+import FeaturesLayout from "../../core/Layout/FeaturesLayout";
 
 const Index = () => {
   const router = useRouter();
@@ -31,9 +32,9 @@ const Index = () => {
   }, [router.pathname]);
 
   return (
-    <div className="relative w-full h-screen bg-secondary overflow-y-auto md:pt-[128px] pt-[20px]">
+    <FeaturesLayout title="Apparel" description="">
       {/* silder  */}
-      <div className="md:px-[100px] px-[5px] grid md:grid-cols-3 grid-cols-2 md:gap-20 gap-5">
+      <div className="md:px-[100px] px-[5px] py-10 grid md:grid-cols-3 grid-cols-2 md:gap-20 gap-5">
         {
           pageData?.map((prd,idx) => {
             return (
@@ -42,7 +43,7 @@ const Index = () => {
           })
         }
       </div>
-    </div>
+      </FeaturesLayout>
   );
 };
 

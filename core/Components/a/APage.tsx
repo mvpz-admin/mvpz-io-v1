@@ -18,6 +18,7 @@ const APage = ({ makeSelectedTab, username }) => {
   const [profileDataLoading, setProfileDataLoading] = useState(false);
   const router = useRouter();
   const { cardId, setCardId } = useCardDetailsStore((state) => state);
+  
 
   const handleFetchProfileData = async ({ username }) => {
     setProfileDataLoading(true);

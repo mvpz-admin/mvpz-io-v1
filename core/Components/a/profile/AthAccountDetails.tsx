@@ -21,6 +21,7 @@ import {
 import { callAPI } from "../../../../lib/utils";
 import MenuOptions from "../../../Atoms/Others/MenuOption";
 import { useRouter } from "next/router";
+import ShareModel from "../../Widgets/ShareModel";
 
 const AthAccountDetails = ({ profileDataLoading, profileData }) => {
   const [showMore, setShowMore] = useState(false);
@@ -30,6 +31,7 @@ const AthAccountDetails = ({ profileDataLoading, profileData }) => {
   const [following, setFollowing] = useState(null);
   const { user } = useAuthStore((state) => state);
   const router = useRouter()
+  const [isShareModelOpen, setIsShareModelOpen] = useState(false);
 
   const handleToggleFollow = async () => {
     setFollowing(!following);
@@ -224,7 +226,7 @@ const AthAccountDetails = ({ profileDataLoading, profileData }) => {
                           id: "SHARE",
                         },
                       ]}
-                      onSelect={() => {}}
+                      onSelect={() => setIsShareModelOpen(true)}
                     >
                       <IoMdMore className="md:text-[22px] text-[20px]" />
                     </MenuOptions>
@@ -289,6 +291,13 @@ const AthAccountDetails = ({ profileDataLoading, profileData }) => {
           </div>
         )}
       </div>
+      {isShareModelOpen && (
+          <ShareModel
+            title="Share Profile"
+            pathname={`/a/${profileData?.username}`}
+            closeModel={() => setIsShareModelOpen(false)}
+          />
+        )}
     </>
   );
 };

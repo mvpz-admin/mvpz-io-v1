@@ -4,15 +4,15 @@ import FeaturesLayout from '../../core/Layout/FeaturesLayout'
 
 const Index = () => {
   return (
-    <FeaturesLayout title="Marketplace" description="">
+    <FeaturesLayout title="Packs" description="">
     <div className="md:px-10 px-5">
       <div className="w-full h-[500px] flex flex-col justify-center items-center">
         <IoFileTrayOutline className="text-ternary md:text-[80px] text-[40px] mb-2" />
         <div className="text-secondary text-2xl font-bold opacity-50">
-          No Card In Marketplace Yet!
+          No Packs Yet!
         </div>
         <article className="text-sm text-secondary opacity-50">
-          Card will be available soon.
+          Packs will be available soon.
         </article>
       </div>
     </div>

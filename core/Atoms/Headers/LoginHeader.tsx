@@ -19,6 +19,7 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import axios from "axios";
 import {
   useCartStore,
+  useGlobalMenuStore,
   useLoginProcessStore,
   useNotifications,
 } from "../../../store/useGlobalStore";
@@ -39,23 +40,29 @@ const LoginHeader = () => {
   const { logout } = useAuthStore.getState();
   const isLoggedIn = useAuthStore((state) => state.user);
   const { setOpenLoginModel } = useLoginProcessStore((state) => state);
-  const { totalProd, setOpenModel : setOpenCartModel } = useCartStore((state) => state);
+  const { totalProd, setOpenModel: setOpenCartModel } = useCartStore(
+    (state) => state
+  );
   const { user } = useAuthStore((state) => state);
   const [showOptions, setShowOptions] = useState(false);
   const [showUtilitiesInfo, setShowUtilitiesInfo] = useState(false);
   const [showXPInfo, setShowXPInfo] = useState(false);
   const [activeXPTab, setActiveXPTab] = useState("Progress");
   const xpRef = React.useRef<HTMLDivElement>(null);
-  const {addNotification, setNotifications, setOpenModel : setOpenNotificationsModel } =
-    useNotifications();
+  const {
+    addNotification,
+    setNotifications,
+    setOpenModel: setOpenNotificationsModel,
+  } = useNotifications();
   const [xp, setXp] = useState<any>(null);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
-
+  const [unreadNotificationsCount, setUnreadNotificationsCount] =
+    useState<number>(0);
+  const { setOpenGlobalMenu } = useGlobalMenuStore((state) => state);
   const [stages, setStages] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await callAPI({endpoint : "/v1/xp/xpLeaderboard"});
+      const response = await callAPI({ endpoint: "/v1/xp/xpLeaderboard" });
       setStages(response.data);
     };
     fetchData();
@@ -64,16 +71,15 @@ const LoginHeader = () => {
   useEffect(() => {
     // Fetch stored notifications on page load
     const fetchNotifications = async () => {
-     const response = await callAPI({
-      endpoint : "/v1/global/notifications",
+      const response = await callAPI({
+        endpoint: "/v1/global/notifications",
+      });
 
-     })
-
-     if(response.success){
-      setNotifications(response.data.notifications);
-      setUnreadNotificationsCount(response.data.unreadNotificationsCount);
-      setXp(response.data.xp);
-     }
+      if (response.success) {
+        setNotifications(response.data.notifications);
+        setUnreadNotificationsCount(response.data.unreadNotificationsCount);
+        setXp(response.data.xp);
+      }
     };
     fetchNotifications();
 
@@ -181,14 +187,20 @@ const LoginHeader = () => {
     <>
       <div className="relative w-full flex justify-between items-center">
         <div className="flex justify-start items-center">
-          <BsGridFill size={20} className="mr-3 lg:hidden block" />
+          {router.pathname !== "/" && (
+            <BsGridFill
+              size={20}
+              className="mr-3 "
+              onClick={setOpenGlobalMenu}
+            />
+          )}
           <a href="/">
             <Image
               src={`/images/logos/mvpzV1.png`}
               alt="poster"
               width={2000}
               height={2000}
-              className="relative lg:w-[100px] w-[80px] object-contain cursor-pointer lg:mt-0 mt-2"
+              className="relative lg:w-[100px] w-[80px] object-contain cursor-pointer  mt-2"
             />
           </a>
           {/* <div className="md:block hidden w-[1px] h-[40px] bg-white bg-opacity-10 mx-5"></div>
@@ -243,7 +255,9 @@ const LoginHeader = () => {
                     onMouseLeave={() => setShowXPInfo(false)}
                     onClick={() => router.push("/xp")}
                   >
-                    <article className="font-mono font-bold">{formatNumber(xp?.xp)}</article>
+                    <article className="font-mono font-bold">
+                      {formatNumber(xp?.xp)}
+                    </article>
                     <Image
                       src={`/images/other/xp.svg`}
                       alt="xp"
@@ -255,14 +269,16 @@ const LoginHeader = () => {
 
                   {/* XP Tooltip */}
                   {showXPInfo && (
-                   <div  onMouseEnter={() => setShowXPInfo(true)}
-                   onMouseLeave={() => setShowXPInfo(false)}>
-                     <XPBar
-                     stages={stages}
-                      activeXPTab={activeXPTab}
-                      setActiveXPTab={setActiveXPTab}
-                    />
-                   </div>
+                    <div
+                      onMouseEnter={() => setShowXPInfo(true)}
+                      onMouseLeave={() => setShowXPInfo(false)}
+                    >
+                      <XPBar
+                        stages={stages}
+                        activeXPTab={activeXPTab}
+                        setActiveXPTab={setActiveXPTab}
+                      />
+                    </div>
                   )}
                 </div>
                 {/* <div
@@ -284,8 +300,10 @@ const LoginHeader = () => {
                   {showUtilitiesInfo && <UtilitiesBar />}
                 </div> */}
               </div>
-              <div className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
-              onClick={setOpenNotificationsModel}>
+              <div
+                className="relative flex justify-start items-center gap-2 cursor-pointer ml-2"
+                onClick={setOpenNotificationsModel}
+              >
                 <FaBell size={20} />
                 {unreadNotificationsCount > 0 && (
                   <div className="absolute -top-2 -right-2 font-monumentUltraBold font-semibold text-[10px] w-5 h-5 bg-red-500 flex justify-center items-center rounded-full">
@@ -329,7 +347,7 @@ const LoginHeader = () => {
             <div className="lg:hidden flex justify-end items-center gap-5">
               <IoSearch size={20} onClick={() => setFocusSearch(true)} />
               <div onClick={setOpenNotificationsModel}>
-              <FaBell size={20} />
+                <FaBell size={20} />
               </div>
               <div onClick={setOpenCartModel}>
                 <FaCartShopping size={20} />
@@ -482,11 +500,9 @@ const LinksSections = ({ title = null, list = [] }) => {
 };
 
 const XPBar = ({ activeXPTab, setActiveXPTab, stages }) => {
- 
-
   const calculateTotalXp = (xpTypes) => {
     return xpTypes.reduce((total, type) => {
-      return total + (type.earnings.length * type.xpValue);
+      return total + type.earnings.length * type.xpValue;
     }, 0);
   };
   return (
@@ -519,51 +535,73 @@ const XPBar = ({ activeXPTab, setActiveXPTab, stages }) => {
       <div className="p-4">
         {activeXPTab === "Progress" ? (
           <>
-          {stages?.map((stage) => (
-        <div key={stage.id} className='space-y-4 relative w-full '>
-          <h2 className='text-xl font-bold mb-3'>{stage.name}</h2>
-          
-          {/* Progress Items */}
-          <div className='space-y-2 text-xl'>
-            {stage?.xpTypes.map((xpType, index) => (
-              <div key={index} className='flex justify-between items-center'>
-                <span className='text-base'>{xpType.name}</span>
-                <div className='flex items-center'>
-                  {xpType.earnings.length > 0 && (
-                    <span className='text-green-400 mr-3 text-xs'>✓</span>
-                  )}
-                  <span className="text-sm">{xpType.xpValue} XP</span>
+            {stages?.map((stage) => (
+              <div key={stage.id} className="space-y-4 relative w-full ">
+                <h2 className="text-xl font-bold mb-3">{stage.name}</h2>
+
+                {/* Progress Items */}
+                <div className="space-y-2 text-xl">
+                  {stage?.xpTypes.map((xpType, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
+                      <span className="text-base">{xpType.name}</span>
+                      <div className="flex items-center">
+                        {xpType.earnings.length > 0 && (
+                          <span className="text-green-400 mr-3 text-xs">✓</span>
+                        )}
+                        <span className="text-sm">{xpType.xpValue} XP</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex justify-between items-center pt-6 border-t border-gray-800">
+                    <span className="text-gray-400 text-base">
+                      Total XP earned
+                    </span>
+                    <span className="text-sm">
+                      {calculateTotalXp(stage.xpTypes)} XP
+                    </span>
+                  </div>
                 </div>
+
+                {/* Progress Bar */}
+                <div className="h-2 bg-gray-800 rounded-full mt-6">
+                  <div
+                    className="h-full bg-green-400 rounded-full"
+                    style={{
+                      width: `${
+                        (calculateTotalXp(stage.xpTypes) /
+                          stage.xpTypes.reduce(
+                            (total, type) => total + type.xpValue,
+                            0
+                          )) *
+                        100
+                      }%`,
+                    }}
+                  ></div>
+                </div>
+
+                {/* Complete Stage Button */}
+                <button className="w-full py-1 px-2 rounded-2xl bg-gray-900 mt-8 flex justify-between items-center text-sm">
+                  <span className="text-green-400">Complete {stage.name}</span>
+                  <span className="text-gray-400">
+                    {stage.rewards[0]?.name}
+                  </span>
+                </button>
               </div>
             ))}
-
-            <div className='flex justify-between items-center pt-6 border-t border-gray-800'>
-              <span className='text-gray-400 text-base'>Total XP earned</span>
-              <span className="text-sm">{calculateTotalXp(stage.xpTypes)} XP</span>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className='h-2 bg-gray-800 rounded-full mt-6'>
-            <div 
-              className='h-full bg-green-400 rounded-full'
-              style={{ width: `${(calculateTotalXp(stage.xpTypes) / (stage.xpTypes.reduce((total, type) => total + type.xpValue, 0))) * 100}%` }}
-            ></div>
-          </div>
-
-          {/* Complete Stage Button */}
-          <button className='w-full py-1 px-2 rounded-2xl bg-gray-900 mt-8 flex justify-between items-center text-sm'>
-            <span className='text-green-400'>Complete {stage.name}</span>
-            <span className='text-gray-400'>{stage.rewards[0]?.name}</span>
-          </button>
-        </div>
-      ))}
           </>
         ) : (
           <div className="space-y-3">
             <div className="flex flex-col items-center justify-center py-8">
-              <span className="text-lg text-gray-400 font-bold">No rewards yet!</span>
-              <span className="text-sm text-gray-500 mt-2 text-center">Complete stages to unlock rewards</span>
+              <span className="text-lg text-gray-400 font-bold">
+                No rewards yet!
+              </span>
+              <span className="text-sm text-gray-500 mt-2 text-center">
+                Complete stages to unlock rewards
+              </span>
             </div>
           </div>
         )}
