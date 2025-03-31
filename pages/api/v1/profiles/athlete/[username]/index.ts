@@ -42,7 +42,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     })?.then((res) => ({
       ...res,
       profileImage : getEventImage({image : res?.profileImage}),
-      bannerImage : getEventImage({image : res?.bannerImage}),
+      bannerImage : getEventImage({image : res?.bannerImage || "https://res.cloudinary.com/dg0ahswkh/image/upload/v1743460849/main-bg_tpiie6.png"}),
     }))
 
     if(!getAthlete){

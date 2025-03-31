@@ -268,7 +268,8 @@ const UserCardDetails = ({ propCardId = null, model = false }) => {
   const username = router.query.username;
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [displayCard, setDisplayCard] = useState("false");
-
+  const [viewType, setViewType] = useState<"2D" | "3D">("2D");
+  
   const handleFetchCardDetailsData = async ({ cardId }) => {
     setCardDetailsDataLoading(true);
     let response = await callAPI({
@@ -391,11 +392,10 @@ const UserCardDetails = ({ propCardId = null, model = false }) => {
                         className="relative h-[55px]"
                         onClick={() => setDisplayCard(ath?.nftImage)}
                       >
-                      
-                          <Card
-                            ath={ath}
-                            cardDetailsDataLoading={cardDetailsDataLoading}
-                          />
+                        <Card
+                          ath={ath}
+                          cardDetailsDataLoading={cardDetailsDataLoading}
+                        />
                       </SwiperSlide>
                     ))}
               </Swiper>
@@ -443,26 +443,45 @@ const UserCardDetails = ({ propCardId = null, model = false }) => {
                     className={`absolute top-0 left-0 w-full h-full lg:object-contain object-cover rounded-lg`}
                   />
                   {/* avatar */}
-                  <div className="absolute bottom-0 left-0 p-5  w-full lg:h-[200px] bg-gradient-to-b from-transparent to-black  flex flex-row  justify-end items-end  z-10 gap-2">
+                  <div className="absolute bottom-0 left-0 p-5  w-full lg:h-[200px] bg-gradient-to-b from-transparent to-black  flex flex-row  justify-between items-end  z-10 gap-2">
+                    <div className="flex justify-start items-center ">
+                      <div className="mr-4 w-[50px] h-[16px] border border-white border-opacity-20 p-[2px]">
+                        <div className="w-[50%] h-full bg-white bg-opacity-75" />
+                      </div>
+                      <article
+                        className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
+                        style={{
+                          opacity: viewType == "2D" ? "1" : "0.5",
+                        }}
+                        onClick={() => setViewType("2D")}
+                      >
+                        2D
+                      </article>
+                      <span className="text-[10px] font-monumentUltraBold font-semibold uppercase opacity-80 mx-1">
+                        /
+                      </span>
+                      <article
+                        className="text-sm font-monumentUltraBold font-semibold transition-all duration-300 cursor-pointer"
+                        style={{
+                          opacity: viewType == "3D" ? "1" : "0.5",
+                        }}
+                        // onClick={() => setViewType("3D")}
+                      >
+                        3D
+                      </article>
+                    </div>
+                    {/* avatar */}
                     <div className="flex justify-start items-center gap-2">
                       <div className="flex flex-col justify-center items-end ">
                         <div className="flex  justify-start items-center">
                           <article className="text-sm font-monumentUltraBold font-semibold ">
-                            TEAM
+                            TRIBE:
                           </article>
                         </div>
                         <div className="flex justify-start items-center space-x-1">
                           {" "}
-                          <span className="text-[12px] font-inter">
-                            <span>
-                              ver{cardDetailsData?.card?.avatar?.verseion}
-                            </span>{" "}
-                            <span>
-                              {cardDetailsData?.card?.avatar?.edition}
-                            </span>
-                          </span>
-                          <span className="text-[12px] font-inter">
-                            {cardDetailsData?.card?.avatar?.title}
+                          <span className="text-[10px] font-monumentUltraBold font-semibold uppercase opacity-80">
+                            !{cardDetailsData?.card?.avatar?.title}
                           </span>
                         </div>
                       </div>

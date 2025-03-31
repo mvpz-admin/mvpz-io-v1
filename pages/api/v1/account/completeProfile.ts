@@ -58,6 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           profileImage: true,
           bannerImage: true,
           isProfileCompleted: true,
+          xp : true
         },
       })
       .then((res) => ({
@@ -103,6 +104,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           xpEarn: xPType.xpValue,
         },
       });
+
+      await prisma.user.update({
+        where : {
+          id : user?.id
+        },
+        data : {
+          xp : response?.xp + xPType.xpValue
+        }
+      })
     }
     return res.status(200).json({
       success: true,

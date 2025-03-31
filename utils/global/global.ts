@@ -12,21 +12,21 @@ export const enableBodyScroll = () => {
 export const HomePagesTab = [
     { label: "All",  gradient: 0, url: "/" },
     { label: "Fanzone", gradient: 3, url: "/fanzone" },
-    { label: "Apparel", gradient: 4, url: "/apparel" },
-    { label: "Packs", gradient: 5, url: "/packs" },
-    { label: "Market", gradient: 6, url: "/market" },
-    { label: "Swap", gradient: 7, url: "/swap" },
-    { label: "Auctions", gradient: 8, url: "/auctions" },
+    // { label: "Apparel", gradient: 4, url: "/apparel" },
+    // { label: "Packs", gradient: 5, url: "/packs" },
+    // { label: "Market", gradient: 6, url: "/market" },
+    // { label: "Swap", gradient: 7, url: "/swap" },
+    // { label: "Auctions", gradient: 8, url: "/auctions" },
   ]
 
   export const SidebarTab = [
     { label: "Home",  gradient: 0, url: "/" },
     { label: "Fanzone", gradient: 3, url: "/fanzone" },
-    { label: "Apparel", gradient: 4, url: "/apparel" },
-    { label: "Packs", gradient: 5, url: "/packs" },
-    { label: "Market", gradient: 6, url: "/market" },
-    { label: "Swap", gradient: 7, url: "/swap" },
-    { label: "Auctions", gradient: 8, url: "/auctions" },
+    // { label: "Apparel", gradient: 4, url: "/apparel" },
+    // { label: "Packs", gradient: 5, url: "/packs" },
+    // { label: "Market", gradient: 6, url: "/market" },
+    // { label: "Swap", gradient: 7, url: "/swap" },
+    // { label: "Auctions", gradient: 8, url: "/auctions" },
   ]
 
 export const HomePageLeaderboardTab = [

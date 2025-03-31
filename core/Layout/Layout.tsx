@@ -70,6 +70,7 @@ const Layout: React.FC<Props> = (props) => {
     "/terms",
     "/cookies",
     "/policy",
+    "/faqs",
     "/auth/account/new",
     "/[accountType]/[username]/card/[cardId]",
     "/[accountType]/[username]/collected/[cardId]",

@@ -104,15 +104,8 @@ const Section1CardDetails = async ({ cardId, user }) => {
             membershipTier: true,
             design: true,
             designer: true,
-            athlete: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-                profileImage: true,
-                isVerified: true,
-              },
-            },
+            type : true,
+            athleteId : true,
             avatars: {
               select: {
                 id: true,
@@ -151,7 +144,36 @@ const Section1CardDetails = async ({ cardId, user }) => {
     .then(async (res) => {
       if (!res?.nftEntity) return null;
 
-      const { athlete, avatars, majorEnhancements, ...cardDetails } = res.nftEntity;
+      const {  avatars, majorEnhancements, ...cardDetails } = res.nftEntity;
+
+
+
+      let athlete = cardDetails?.type == "Athlete" ? 
+      await  prisma.user.findFirst({
+        where : {
+            id : cardDetails?.athleteId
+        },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profileImage: true,
+          isVerified: true,
+        },
+      }) : 
+      await  prisma.user.findFirst({
+        where : {
+            username : "@mvpz.team"
+        },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profileImage: true,
+          isVerified: true,
+        },
+      })
+
       const avatar = avatars[0]; // Get the first avatar
       const currentEnhancement = majorEnhancements[0]; // Get the current enhancement
 

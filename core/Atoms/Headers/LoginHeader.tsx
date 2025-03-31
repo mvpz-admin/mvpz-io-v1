@@ -148,26 +148,26 @@ const LoginHeader = () => {
       url:
         user?.role == "User" ? `/p/${user?.username}` : `/a/${user?.username}`,
     },
-    {
-      label: "Orders",
-      icon: FaCartShopping,
-      url: null,
-    },
-    {
-      label: "Referrals",
-      icon: FaUserAstronaut,
-      url: null,
-    },
-    {
-      label: "Earnings",
-      icon: SiTradingview,
-      url: null,
-    },
-    {
-      label: "Wallets",
-      icon: IoWallet,
-      url: null,
-    },
+    // {
+    //   label: "Orders",
+    //   icon: FaCartShopping,
+    //   url: null,
+    // },
+    // {
+    //   label: "Referrals",
+    //   icon: FaUserAstronaut,
+    //   url: null,
+    // },
+    // {
+    //   label: "Earnings",
+    //   icon: SiTradingview,
+    //   url: null,
+    // },
+    // {
+    //   label: "Wallets",
+    //   icon: IoWallet,
+    //   url: null,
+    // },
   ];
 
   // // Add click outside handler

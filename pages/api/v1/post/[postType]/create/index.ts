@@ -85,6 +85,16 @@ const PublicPost = async ({ res, user, html, thumbnail }) => {
         },
     }));
 
+    let userXp = await prisma.user.findFirst({
+      where : {
+        id : user?.id
+      },
+      select : {
+        xp : true
+      }
+   
+    })
+
     await prisma.notification.create({
       data : {
         userId : user?.id,
@@ -123,6 +133,15 @@ const PublicPost = async ({ res, user, html, thumbnail }) => {
           xpEarn: xPType.xpValue,
         },
       });
+
+      await prisma.user.update({
+        where : {
+          id : user?.id
+        },
+        data : {
+          xp : userXp?.xp + xPType.xpValue
+        }
+      })
     }
 
 

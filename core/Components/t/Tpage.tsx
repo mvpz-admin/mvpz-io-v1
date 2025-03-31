@@ -126,7 +126,7 @@ const TPage = ({ tribeId }) => {
                 {item.label}
               </div>
             ))}
-            <div
+            {/* <div
               className={`flex justify-center px-4 py-2 rounded-full bg-white bg-opacity-0 border border-white border-opacity-0 font-inter font-semibold cursor-not-allowed text-sm opacity-50`}
               // onClick={() => router.push(`/t/${tribeId}/challenges`)}
             >
@@ -137,7 +137,7 @@ const TPage = ({ tribeId }) => {
              
             >
               Utilities
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
