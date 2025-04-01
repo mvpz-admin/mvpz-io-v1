@@ -10,45 +10,30 @@ export default async function handler(
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    let pc = await prisma.nFTPurchaseCard.findMany({
-      where : {
-        status : "ASSIGNED"
+    let enh = await prisma.nFTMajorEnhancement.findMany({
+      include: {
+        nftEntity: true,
+        avatar: true,
       },
-      include : {
-        currentOwner : true,
-        nftEntity : true
-      }
     });
 
     await Promise.all(
-      pc.map(async (c) => {
-        let getUser = await prisma.user.findFirst({
-          where : {
-            id : c.currentOwner.id
-          }
-        })
+      enh.map(async (c) => {
+        // Create 50 purchases for each enhancement
+        const purchases = Array(50).fill(null).map(() => ({
+          purchaseId: null,
+          mintId: null,
+          nftMajorEnhancementId: c.id,
+          avatarId: c.avatar.id,
+          status: "UNASSIGNED",
+          isMinted: false,
+        }));
 
-        let type = c.nftEntity.type?.charAt(0).toUpperCase() + c.nftEntity.type?.slice(1).toLowerCase()
-
-
-       let getXpFactor = await prisma.xPFactor.findFirst({
-           where : type == "Championship" || type == "Team" ? {
-            type
-           } : {
-            type,
-            membershipTier: c.nftEntity.membershipTier
-           }
-       })
-
-       await prisma.user.update({
-        where : {
-          id : getUser.id
-        },
-        data : {
-          xp : getUser.xp + getXpFactor.factorValue
-        }
+        await prisma.nFTMajorEnhancementPurchase.createMany({
+          data: purchases,
+        });
       })
-    }));
+    );
 
     return res.status(200).json({
       message: "Successfully processed purchases",
@@ -58,7 +43,8 @@ export default async function handler(
     console.error("Error creating XP system items:", error);
     return res.status(500).json({
       error: "Failed to create XP system items",
-      details: error instanceof Error ? error.message : "Unknown error occurred",
+      details:
+        error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }

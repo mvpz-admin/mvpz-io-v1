@@ -36,6 +36,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       switch (item?.productType) {
         case "card":
           let card = item?.card;
+          console.log({
+            card
+          });
+          
           let getBaseCard = await prisma.nFTMajorEnhancement.findFirst({
             where: {
               id: card?.baseCard?.id,
@@ -46,6 +50,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               type: true,
               nftEntity: true,
             },
+          });
+
+          console.log({
+            getBaseCard
           });
 
           // if first time minting
@@ -61,6 +69,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 },
               }
             );
+
+            console.log({
+              checkPurchaseAvailable
+            });
 
             if (!checkPurchaseAvailable) {
               return res.status(500).json({

@@ -145,7 +145,7 @@ const Layout: React.FC<Props> = (props) => {
       {/* Edit Profile */}
       {openEditProfile && <EditProfile />}
       {/* Request A Card */}
-      {user?.role == "Athlete" &&
+       {user?.role == "Athlete" &&
         user?.isProfileCompleted &&
         !user?.isCardCreated &&
         !user?.isWaitlisted && <CardCreator />}

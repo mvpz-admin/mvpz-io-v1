@@ -14,9 +14,10 @@ import { useRouter } from "next/router";
 import { useGlobalStore } from "../store/useGlobalStore";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import OnboardingModal from "../core/Components/Modals/OnboardingModal";
+import LaunchModel from "../core/Components/Modals/LaunchModel";
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   let router = useRouter();
   const authStore = useAuthStore((state) => state.user);
   const handleFetchGlobalData = useGlobalStore(
@@ -30,8 +31,8 @@ const App = ({ Component, pageProps }: AppProps) => {
   useEffect(() => {
     // Check if user has seen the onboarding
     const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
+    if (!!hasSeenOnboarding) {
+      setShowOnboarding(hasSeenOnboarding === "true" ? false : true);
     }
   }, []);
 
@@ -100,13 +101,15 @@ const App = ({ Component, pageProps }: AppProps) => {
         </SessionProvider>{" "}
       </MantineProvider>
       <InstallPWA />
-     { <OnboardingModal
+     {/* { <OnboardingModal
         opened={showOnboarding}
         onClose={() => {
           setShowOnboarding(false);
           localStorage.setItem('hasSeenOnboarding', 'true');
         }}
-      />}
+      />} */}
+     {/* {showOnboarding &&
+      <LaunchModel setShowOnboarding={setShowOnboarding} />} */}
     </>
   );
 };
